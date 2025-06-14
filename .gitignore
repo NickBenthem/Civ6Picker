@@ -53,3 +53,10 @@ pnpm-debug.log*
 .supabase
 .vercel
 .env*.local
+
+# Generated SQL files
+civ6_data.sql
+convert_to_sql.sh
+
+# Supabase temporary files
+supabase/.temp/
