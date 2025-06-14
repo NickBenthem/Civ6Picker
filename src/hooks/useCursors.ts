@@ -43,7 +43,7 @@ export function useCursors(userId: string, userName: string) {
 
     async function setupCursors() {
       try {
-        // Initial fetch
+        // Initial fetchs
         const { data, error } = await supabase
           .from('cursors')
           .select('*')
