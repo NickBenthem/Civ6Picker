@@ -51,3 +51,5 @@ pnpm-debug.log*
 
 # Supabase
 .supabase
+.vercel
+.env*.local

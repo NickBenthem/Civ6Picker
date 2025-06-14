@@ -35,28 +35,78 @@
     - Enable real-time for all tables to support live updates
 */
 
--- Leaders table
+-- Drop existing tables if they exist
+DROP TABLE IF EXISTS votes CASCADE;
+DROP TABLE IF EXISTS unique_units CASCADE;
+DROP TABLE IF EXISTS unique_infrastructure CASCADE;
+DROP TABLE IF EXISTS leaders CASCADE;
+DROP TABLE IF EXISTS civilizations CASCADE;
+
+-- Create civilizations table
+CREATE TABLE IF NOT EXISTS civilizations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  image_key text NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+
+-- Create leaders table with updated schema
 CREATE TABLE IF NOT EXISTS leaders (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
-  civilization text NOT NULL,
-  image_url text NOT NULL,
+  civilization_id uuid NOT NULL,
+  image_key text NOT NULL,
+  ability text NOT NULL,
   is_banned boolean DEFAULT false,
   banned_by text,
   banned_at timestamptz,
-  created_at timestamptz DEFAULT now()
+  created_at timestamptz DEFAULT now(),
+  CONSTRAINT fk_civilization
+    FOREIGN KEY (civilization_id)
+    REFERENCES civilizations(id)
+    ON DELETE CASCADE
 );
 
--- Votes table
+-- Create unique units table
+CREATE TABLE IF NOT EXISTS unique_units (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  civilization_id uuid NOT NULL,
+  name text NOT NULL,
+  image_key text NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  CONSTRAINT fk_civilization_units
+    FOREIGN KEY (civilization_id)
+    REFERENCES civilizations(id)
+    ON DELETE CASCADE
+);
+
+-- Create unique infrastructure table
+CREATE TABLE IF NOT EXISTS unique_infrastructure (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  civilization_id uuid NOT NULL,
+  name text NOT NULL,
+  image_key text NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  CONSTRAINT fk_civilization_infra
+    FOREIGN KEY (civilization_id)
+    REFERENCES civilizations(id)
+    ON DELETE CASCADE
+);
+
+-- Create votes table
 CREATE TABLE IF NOT EXISTS votes (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  leader_id uuid REFERENCES leaders(id) ON DELETE CASCADE,
+  leader_id uuid NOT NULL,
   user_id text NOT NULL,
   vote_type text DEFAULT 'ban',
-  created_at timestamptz DEFAULT now()
+  created_at timestamptz DEFAULT now(),
+  CONSTRAINT fk_leader
+    FOREIGN KEY (leader_id)
+    REFERENCES leaders(id)
+    ON DELETE CASCADE
 );
 
--- Cursors table for real-time cursor tracking
+-- Create cursors table for real-time cursor tracking
 CREATE TABLE IF NOT EXISTS cursors (
   user_id text PRIMARY KEY,
   x integer NOT NULL,
@@ -67,9 +117,19 @@ CREATE TABLE IF NOT EXISTS cursors (
 );
 
 -- Enable Row Level Security
+ALTER TABLE civilizations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE leaders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE unique_units ENABLE ROW LEVEL SECURITY;
+ALTER TABLE unique_infrastructure ENABLE ROW LEVEL SECURITY;
 ALTER TABLE votes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cursors ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for civilizations
+CREATE POLICY "Anyone can read civilizations"
+  ON civilizations
+  FOR SELECT
+  TO anon, authenticated
+  USING (true);
 
 -- Create policies for leaders
 CREATE POLICY "Anyone can read leaders"
@@ -81,6 +141,20 @@ CREATE POLICY "Anyone can read leaders"
 CREATE POLICY "Anyone can update leaders"
   ON leaders
   FOR UPDATE
+  TO anon, authenticated
+  USING (true);
+
+-- Create policies for unique units
+CREATE POLICY "Anyone can read unique units"
+  ON unique_units
+  FOR SELECT
+  TO anon, authenticated
+  USING (true);
+
+-- Create policies for unique infrastructure
+CREATE POLICY "Anyone can read unique infrastructure"
+  ON unique_infrastructure
+  FOR SELECT
   TO anon, authenticated
   USING (true);
 
@@ -116,17 +190,88 @@ CREATE POLICY "Anyone can update cursors"
   TO anon, authenticated
   USING (true);
 
--- Insert sample Civ6 leaders (using placeholder images for now)
-INSERT INTO leaders (name, civilization, image_url) VALUES
-  ('Alexander', 'Macedonia', 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop'),
-  ('Cleopatra', 'Egypt', 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop'),
-  ('Gandhi', 'India', 'https://images.pexels.com/photos/1040879/pexels-photo-1040879.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop'),
-  ('Gilgamesh', 'Sumeria', 'https://images.pexels.com/photos/1040878/pexels-photo-1040878.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop'),
-  ('Montezuma', 'Aztec', 'https://images.pexels.com/photos/1040877/pexels-photo-1040877.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop'),
-  ('Napoleon', 'France', 'https://images.pexels.com/photos/1040876/pexels-photo-1040876.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop'),
-  ('Peter', 'Russia', 'https://images.pexels.com/photos/1040875/pexels-photo-1040875.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop'),
-  ('Qin Shi Huang', 'China', 'https://images.pexels.com/photos/1040874/pexels-photo-1040874.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop'),
-  ('Roosevelt', 'America', 'https://images.pexels.com/photos/1040873/pexels-photo-1040873.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop'),
-  ('Saladin', 'Arabia', 'https://images.pexels.com/photos/1040872/pexels-photo-1040872.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop'),
-  ('Trajan', 'Rome', 'https://images.pexels.com/photos/1040871/pexels-photo-1040871.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop'),
-  ('Victoria', 'England', 'https://images.pexels.com/photos/1040870/pexels-photo-1040870.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop');
+-- Insert sample data
+INSERT INTO civilizations (name, image_key) VALUES
+  ('American', 'American__Civ6_.png'),
+  ('Arabian', 'Arabian__Civ6_.png'),
+  ('Australian', 'Australian__Civ6_.png');
+
+-- Insert American leaders
+WITH american_civ AS (SELECT id FROM civilizations WHERE name = 'American')
+INSERT INTO leaders (name, civilization_id, image_key, ability)
+SELECT 
+  'Teddy Roosevelt',
+  id,
+  'Teddy_Roosevelt__Civ6_.png',
+  'Founding Fathers Government legacy bonuses accumulate in half the usual number of turns. \n All Diplomatic policy slots in the current government are converted to Wildcard slots. \n All Diplomatic policy slots in the current government are converted to Wildcard slots. \n +1 Diplomatic Favor per turn for each Wildcard slot in the current government.'
+FROM american_civ
+UNION ALL
+SELECT 
+  'Teddy Roosevelt (Bull Moose)',
+  id,
+  'Teddy_Roosevelt__Civ6_.png',
+  'Founding Fathers Government legacy bonuses accumulate in half the usual number of turns. \n All Diplomatic policy slots in the current government are converted to Wildcard slots. \n All Diplomatic policy slots in the current government are converted to Wildcard slots. \n +1 Diplomatic Favor per turn for each Wildcard slot in the current government.'
+FROM american_civ
+UNION ALL
+SELECT 
+  'Teddy Roosevelt (Rough Rider)',
+  id,
+  'Teddy_Roosevelt__Rough_Rider___Civ6_.png',
+  'Founding Fathers Government legacy bonuses accumulate in half the usual number of turns. \n All Diplomatic policy slots in the current government are converted to Wildcard slots. \n All Diplomatic policy slots in the current government are converted to Wildcard slots. \n +1 Diplomatic Favor per turn for each Wildcard slot in the current government.'
+FROM american_civ
+UNION ALL
+SELECT 
+  'Abraham Lincoln',
+  id,
+  'Abraham_Lincoln__Civ6_.png',
+  'Founding Fathers Government legacy bonuses accumulate in half the usual number of turns. \n All Diplomatic policy slots in the current government are converted to Wildcard slots. \n All Diplomatic policy slots in the current government are converted to Wildcard slots. \n +1 Diplomatic Favor per turn for each Wildcard slot in the current government.'
+FROM american_civ;
+
+-- Insert Arabian leaders
+WITH arabian_civ AS (SELECT id FROM civilizations WHERE name = 'Arabian')
+INSERT INTO leaders (name, civilization_id, image_key, ability)
+SELECT 
+  'Saladin (Vizier)',
+  id,
+  'Saladin__Civ6_.png',
+  'The Last Prophet Automatically receives the final Great Prophet when the next-to-last one is claimed (unless one has already been earned through other means). \n +1 Science per foreign city following Arabia''s Religion.'
+FROM arabian_civ
+UNION ALL
+SELECT 
+  'Saladin (Sultan)',
+  id,
+  'Saladin__Sultan___Civ6_.png',
+  'The Last Prophet Automatically receives the final Great Prophet when the next-to-last one is claimed (unless one has already been earned through other means). \n +1 Science per foreign city following Arabia''s Religion.'
+FROM arabian_civ;
+
+-- Insert Australian leaders
+WITH australian_civ AS (SELECT id FROM civilizations WHERE name = 'Australian')
+INSERT INTO leaders (name, civilization_id, image_key, ability)
+SELECT 
+  'John Curtin',
+  id,
+  'John_Curtin__Civ6_.png',
+  'Land Down Under +3 Housing in coastal cities. \n Building a Pasture triggers a Culture Bomb, claiming surrounding tiles. \n Campus, Commercial Hub, Holy Site, and Theater Square districts gain +1 to their yields in tiles with Charming Appeal, and +3 in tiles with Breathtaking Appeal.'
+FROM australian_civ;
+
+-- Insert unique units
+WITH american_civ AS (SELECT id FROM civilizations WHERE name = 'American'),
+     arabian_civ AS (SELECT id FROM civilizations WHERE name = 'Arabian'),
+     australian_civ AS (SELECT id FROM civilizations WHERE name = 'Australian')
+INSERT INTO unique_units (civilization_id, name, image_key)
+SELECT id, 'P-51 Mustang', 'P-51_Mustang__Civ6_.png' FROM american_civ
+UNION ALL
+SELECT id, 'Mamluk', 'Mamluk__Civ6_.png' FROM arabian_civ
+UNION ALL
+SELECT id, 'Digger', 'Digger__Civ6_.png' FROM australian_civ;
+
+-- Insert unique infrastructure
+WITH american_civ AS (SELECT id FROM civilizations WHERE name = 'American'),
+     arabian_civ AS (SELECT id FROM civilizations WHERE name = 'Arabian'),
+     australian_civ AS (SELECT id FROM civilizations WHERE name = 'Australian')
+INSERT INTO unique_infrastructure (civilization_id, name, image_key)
+SELECT id, 'Film Studio', 'Film_Studio__Civ6_.png' FROM american_civ
+UNION ALL
+SELECT id, 'Madrasa', 'Madrasa__Civ6_.png' FROM arabian_civ
+UNION ALL
+SELECT id, 'Outback Station', 'Outback_Station__Civ6_.png' FROM australian_civ;

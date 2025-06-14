@@ -10,24 +10,42 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
-  }
-});
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Test the connection
-supabase.from('leaders').select('count').then(
-  ({ data, error }) => {
-    if (error) {
-      console.error('Supabase connection test failed:', error);
-    } else {
-      console.log('Supabase connection test successful:', data);
-    }
+const testConnection = async () => {
+  const { data, error } = await supabase
+    .from('leaders')
+    .select(`
+      *,
+      civilizations!civilization_id (
+        id,
+        name,
+        image_key,
+        created_at,
+        unique_units (
+          id,
+          name,
+          image_key,
+          created_at
+        ),
+        unique_infrastructure (
+          id,
+          name,
+          image_key,
+          created_at
+        )
+      )
+    `);
+    
+  if (error) {
+    console.error('Supabase connection test failed:', error);
+  } else {
+    console.log('Supabase connection test successful:', data);
   }
-);
+};
+
+testConnection();
 
 export type UniqueUnit = {
   id: string;

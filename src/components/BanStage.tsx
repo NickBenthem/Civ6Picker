@@ -12,7 +12,7 @@ interface BanStageProps {
 
 export function BanStage({ userName, onBack }: BanStageProps) {
   const { leaders, loading, toggleBanLeader, refetch } = useLeaders();
-  const { cursors, updateCursor } = useCursors(userName);
+  const { cursors, updateCursor } = useCursors(userName, userName);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     updateCursor(e.clientX, e.clientY);
