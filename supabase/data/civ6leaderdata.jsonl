@@ -2,17 +2,6 @@
     {
         "Civilization": "American",
         "Civilization_Key": "American__Civ6_.png",
-        "Leader": "Teddy Roosevelt",
-        "Leader_Key": "Teddy_Roosevelt__Civ6_.png",
-        "Ability": "Expand Founding Fathers Government legacy bonuses accumulate in half the usual number of turns. All Diplomatic policy slots in the current government are converted to Wildcard slots. All Diplomatic policy slots in the current government are converted to Wildcard slots. +1 Diplomatic Favor per turn for each Wildcard slot in the current government.",
-        "Unique_Units": "P-51 Mustang",
-        "Unit_Keys": "P-51_Mustang__Civ6_.png",
-        "Unique_Infrastructure": "Film Studio",
-        "Infra_Keys": "Film_Studio__Civ6_.png"
-    },
-    {
-        "Civilization": "American",
-        "Civilization_Key": "American__Civ6_.png",
         "Leader": "Teddy Roosevelt (Bull Moose)",
         "Leader_Key": "Teddy_Roosevelt__Civ6_.png",
         "Ability": "Expand Founding Fathers Government legacy bonuses accumulate in half the usual number of turns. All Diplomatic policy slots in the current government are converted to Wildcard slots. All Diplomatic policy slots in the current government are converted to Wildcard slots. +1 Diplomatic Favor per turn for each Wildcard slot in the current government.",
@@ -902,17 +891,6 @@
         "Infra_Keys": "Sukiennice__Civ6_.png"
     },
     {
-        "Civilization": "Danish",
-        "Civilization_Key": "Danish__Civ6_.png",
-        "Leader": "Canute",
-        "Leader_Key": "Canute__Civ6_.png",
-        "Ability": "Expand Viking Units ignore additional Movement costs from embarking and disembarking.",
-        "Unique_Units": "Berserker",
-        "Unit_Keys": "Berserker__Civ6_.png",
-        "Unique_Infrastructure": "Stave Church",
-        "Infra_Keys": "Stave_Church__Civ6_.png"
-    },
-    {
         "Civilization": "Norwegian",
         "Civilization_Key": "Norwegian__Civ6_.png",
         "Leader": "Harald Hardrada",
@@ -935,39 +913,6 @@
         "Infra_Keys": "Stave_Church__Civ6_.png"
     },
     {
-        "Civilization": "Andalusian",
-        "Civilization_Key": "Andalusian__Civ6_.png",
-        "Leader": "Al-Hakam II",
-        "Leader_Key": "Al-Hakam_II__Civ6_.png",
-        "Ability": "Expand Moorish The Alhambra wonder is located in I\\u0161biliya .",
-        "Unique_Units": "Farfanes",
-        "Unit_Keys": "Farfanes__Civ6_.png",
-        "Unique_Infrastructure": "Alc\\u00e1zar",
-        "Infra_Keys": "Alc%C3%A1zar__Civ6_.png"
-    },
-    {
-        "Civilization": "Byzantine",
-        "Civilization_Key": "Byzantine__Vikings%2C_Traders%2C_and_Raiders%21___Civ6_.png",
-        "Leader": "Basil II",
-        "Leader_Key": "Basil_II__Vikings%2C_Traders%2C_and_Raiders%21___Civ6_.png",
-        "Ability": "Expand Byzantine The Hagia Sophia Wonder is located in Constantinople .",
-        "Unique_Units": "Quadrireme",
-        "Unit_Keys": "Quadrireme__Civ6_.png",
-        "Unique_Infrastructure": "Monastery",
-        "Infra_Keys": "Monastery__Civ6_.png"
-    },
-    {
-        "Civilization": "Frankish",
-        "Civilization_Key": "Frankish__Civ6_.png",
-        "Leader": "Charlemagne",
-        "Leader_Key": "Charlemagne__Civ6_.png",
-        "Ability": "Expand Frankish The Mt. St. Michel wonder is located in Rouen.",
-        "Unique_Units": "Caballarii",
-        "Unit_Keys": "Caballarii__Civ6_.png",
-        "Unique_Infrastructure": "Monastery",
-        "Infra_Keys": "Monastery__Civ6_.png"
-    },
-    {
         "Civilization": "Macedonian",
         "Civilization_Key": "Macedonian__Civ6_.png",
         "Leader": "Alexander",
@@ -977,17 +922,6 @@
         "Unit_Keys": "Hypaspist__Civ6_.png, Hetairoi__Civ6_.png, Settler__Civ6_.png",
         "Unique_Infrastructure": "Basilikoi Paides",
         "Infra_Keys": "Basilikoi_Paides__Civ6_.png"
-    },
-    {
-        "Civilization": "Persian",
-        "Civilization_Key": "Persian__Civ6_.png",
-        "Leader": "Darius III",
-        "Leader_Key": "Persian__Civ6_.png",
-        "Ability": "Expand Allies Start the game as suzerain of Athens , Marakanda , and Patala .",
-        "Unique_Units": "Immortal",
-        "Unit_Keys": "Immortal__Civ6_.png",
-        "Unique_Infrastructure": "Pairidaeza",
-        "Infra_Keys": "Pairidaeza__Civ6_.png"
     },
     {
         "Civilization": "Egyptian",
@@ -1010,148 +944,5 @@
         "Unit_Keys": "P%C3%ADtati_Archer__Civ6_.png",
         "Unique_Infrastructure": "Nubian Pyramid",
         "Infra_Keys": "Nubian_Pyramid__Civ6_.png"
-    },
-    {
-        "Civilization": "Assyrian",
-        "Civilization_Key": "Assyrian__Civ6_.png",
-        "Leader": "Ashurbanipal",
-        "Leader_Key": "Assyrian__Civ6_.png",
-        "Ability": "None",
-        "Unique_Units": "",
-        "Unit_Keys": "",
-        "Unique_Infrastructure": "",
-        "Infra_Keys": ""
-    },
-    {
-        "Civilization": "Hyksos",
-        "Civilization_Key": "Hyksos__Civ6_.png",
-        "Leader": "Sakir-Har",
-        "Leader_Key": "Hyksos__Civ6_.png",
-        "Ability": "None",
-        "Unique_Units": "",
-        "Unit_Keys": "",
-        "Unique_Infrastructure": "",
-        "Infra_Keys": ""
-    },
-    {
-        "Civilization": "Libyan",
-        "Civilization_Key": "Libyan__Civ6_.png",
-        "Leader": "Osorkon",
-        "Leader_Key": "Libyan__Civ6_.png",
-        "Ability": "None",
-        "Unique_Units": "",
-        "Unit_Keys": "",
-        "Unique_Infrastructure": "",
-        "Infra_Keys": ""
-    },
-    {
-        "Civilization": "Macedonian",
-        "Civilization_Key": "Macedonian__Civ6_.png",
-        "Leader": "Alexander",
-        "Leader_Key": "Macedonian__Civ6_.png",
-        "Ability": "None",
-        "Unique_Units": "",
-        "Unit_Keys": "",
-        "Unique_Infrastructure": "",
-        "Infra_Keys": ""
-    },
-    {
-        "Civilization": "Persian",
-        "Civilization_Key": "Persian__Civ6_.png",
-        "Leader": "Cambyses II",
-        "Leader_Key": "Persian__Civ6_.png",
-        "Ability": "None",
-        "Unique_Units": "",
-        "Unit_Keys": "",
-        "Unique_Infrastructure": "",
-        "Infra_Keys": ""
-    },
-    {
-        "Civilization": "Roman",
-        "Civilization_Key": "Roman__Civ6_.png",
-        "Leader": "Augustus Caesar",
-        "Leader_Key": "Roman__Civ6_.png",
-        "Ability": "None",
-        "Unique_Units": "Legion",
-        "Unit_Keys": "Legion__Civ6_.png",
-        "Unique_Infrastructure": "",
-        "Infra_Keys": ""
-    },
-    {
-        "Civilization": "Chinese",
-        "Civilization_Key": "Chinese__Civ6_.png",
-        "Leader": "Taoism",
-        "Leader_Key": "Taoism__Civ6_.png",
-        "Ability": "Early Empire",
-        "Unique_Units": "River Goddess",
-        "Unit_Keys": "River_Goddess__Civ6_.png",
-        "Unique_Infrastructure": "Faith, Amenity, Faith, Amenity",
-        "Infra_Keys": ""
-    },
-    {
-        "Civilization": "Chola",
-        "Civilization_Key": "Chola__Civ6_.png",
-        "Leader": "Shaivism",
-        "Leader_Key": "Shaivism__Civ6_.png",
-        "Ability": "Celestial Navigation",
-        "Unique_Units": "Sacred Path",
-        "Unit_Keys": "Sacred_Path__Civ6_.png",
-        "Unique_Infrastructure": "Commercial Hub, Harbor, Faith, Science, Gold, Faith",
-        "Infra_Keys": ""
-    },
-    {
-        "Civilization": "Ghaznavid",
-        "Civilization_Key": "Ghaznavid__Civ6_.png",
-        "Leader": "Islam",
-        "Leader_Key": "Islam__Civ6_.png",
-        "Ability": "Celestial Navigation Currency Early Empire",
-        "Unique_Units": "Desert Folklore",
-        "Unit_Keys": "Desert_Folklore__Civ6_.png",
-        "Unique_Infrastructure": "Housing, Faith",
-        "Infra_Keys": ""
-    },
-    {
-        "Civilization": "Indonesian",
-        "Civilization_Key": "Indonesian__Civ6_.png",
-        "Leader": "Hindu Dharma",
-        "Leader_Key": "Hinduism__Civ6_.png",
-        "Ability": "Celestial Navigation",
-        "Unique_Units": "God of the Sea",
-        "Unit_Keys": "God_of_the_Sea__Civ6_.png",
-        "Unique_Infrastructure": "Commercial Hub, Harbor, Faith, Builders, Kampung, Guilds",
-        "Infra_Keys": ""
-    },
-    {
-        "Civilization": "Khmer",
-        "Civilization_Key": "Khmer__Civ6_.png",
-        "Leader": "Theravada Buddhism",
-        "Leader_Key": "Theravada_Buddhism__Civ6_.png",
-        "Ability": "Early Empire Engineering Mysticism",
-        "Unique_Units": "Stone Circles",
-        "Unit_Keys": "Stone_Circles__Civ6_.png",
-        "Unique_Infrastructure": "Faith, Amenity, Culture",
-        "Infra_Keys": ""
-    },
-    {
-        "Civilization": "Pala",
-        "Civilization_Key": "Pala__Civ6_.png",
-        "Leader": "Mahayana Buddhism",
-        "Leader_Key": "Mahayana_Buddhism__Civ6_.png",
-        "Ability": "Mysticism",
-        "Unique_Units": "Earth Goddess",
-        "Unit_Keys": "Earth_Goddess__Civ6_.png",
-        "Unique_Infrastructure": "Production",
-        "Infra_Keys": ""
-    },
-    {
-        "Civilization": "Tufan",
-        "Civilization_Key": "Tufan__Civ6_.png",
-        "Leader": "Vajrayana Buddhism",
-        "Leader_Key": "Vajrayana_Buddhism__Civ6_.png",
-        "Ability": "Mysticism",
-        "Unique_Units": "God of the Open Sky",
-        "Unit_Keys": "God_of_the_Open_Sky__Civ6_.png",
-        "Unique_Infrastructure": "Amenity",
-        "Infra_Keys": ""
     }
 ]
