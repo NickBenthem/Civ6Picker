@@ -1,26 +1,30 @@
 import { useState, useEffect } from 'react';
-import { supabase, type Leader } from '../lib/supabase';
+import { fetchLeaders, type Leader } from '../lib/supabase';
+
+const API_URL = 'https://ymllyikqdmsbldxfzmdl.supabase.co/functions/v1';
+
+function sortLeaders(leaders: Leader[]): Leader[] {
+  return [...leaders].sort((a, b) => {
+    // First sort by civilization name
+    const civA = a.civilization?.name || '';
+    const civB = b.civilization?.name || '';
+    if (civA !== civB) {
+      return civA.localeCompare(civB);
+    }
+    // If same civilization, sort by leader name
+    return a.name.localeCompare(b.name);
+  });
+}
 
 export function useLeaders() {
   const [leaders, setLeaders] = useState<Leader[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  async function fetchLeaders() {
+  async function fetchLeadersData() {
     try {
-      const { data, error } = await supabase
-        .from('leaders')
-        .select(`
-          *,
-          civilization:civilization_id (
-            *,
-            unique_units(*),
-            unique_infrastructure(*)
-          )
-        `);
-      
-      if (error) throw error;
-      setLeaders(data || []);
+      const data = await fetchLeaders();
+      setLeaders(sortLeaders(data));
     } catch (e) {
       setError(e instanceof Error ? e : new Error('Failed to fetch leaders'));
     } finally {
@@ -28,38 +32,97 @@ export function useLeaders() {
     }
   }
 
-  useEffect(() => {
-    fetchLeaders();
-  }, []);
-
   async function toggleBanLeader(leaderId: string, userName: string) {
+    const currentLeader = leaders.find(l => l.id === leaderId);
+    if (!currentLeader) throw new Error('Leader not found');
+
     try {
-      setLoading(true);
-      const { data: currentLeader, error: fetchError } = await supabase
-        .from('leaders')
-        .select('is_banned')
-        .eq('id', leaderId)
-        .single();
+      // Update the local state immediately for better UX
+      setLeaders(prevLeaders => 
+        sortLeaders(prevLeaders.map(leader => 
+          leader.id === leaderId 
+            ? {
+                ...leader,
+                is_banned: !leader.is_banned,
+                banned_by: !leader.is_banned ? userName : null,
+                banned_at: !leader.is_banned ? new Date().toISOString() : null
+              }
+            : leader
+        ))
+      );
 
-      if (fetchError) throw fetchError;
-
-      const { error: updateError } = await supabase
-        .from('leaders')
-        .update({
-          is_banned: !currentLeader.is_banned,
-          banned_by: !currentLeader.is_banned ? userName : null,
-          banned_at: !currentLeader.is_banned ? new Date().toISOString() : null
+      // Call the broadcast-leader-state endpoint
+      const response = await fetch(`${API_URL}/broadcast-leader-state`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          leaderId,
+          userName,
+          isBanned: !currentLeader.is_banned
         })
-        .eq('id', leaderId);
+      });
 
-      if (updateError) throw updateError;
-      await fetchLeaders();
+      if (!response.ok) {
+        throw new Error('Failed to update ban status');
+      }
     } catch (e) {
       setError(e instanceof Error ? e : new Error('Failed to toggle ban'));
-    } finally {
-      setLoading(false);
+      // Revert the local state change on error
+      setLeaders(prevLeaders => 
+        sortLeaders(prevLeaders.map(leader => 
+          leader.id === leaderId 
+            ? {
+                ...leader,
+                is_banned: currentLeader.is_banned,
+                banned_by: currentLeader.banned_by,
+                banned_at: currentLeader.banned_at
+              }
+            : leader
+        ))
+      );
     }
   }
 
-  return { leaders, loading, error, toggleBanLeader, refetch: fetchLeaders };
+  useEffect(() => {
+    let eventSource: EventSource;
+
+    async function setupLeaders() {
+      try {
+        // Initial fetch
+        await fetchLeadersData();
+
+        // Setup Server-Sent Events connection
+        eventSource = new EventSource(`${API_URL}/broadcast-leader-state`);
+
+        eventSource.addEventListener('leader-updated', (event) => {
+          const updatedLeader = JSON.parse(event.data);
+          setLeaders(prevLeaders => 
+            sortLeaders(prevLeaders.map(leader => 
+              leader.id === updatedLeader.id ? updatedLeader : leader
+            ))
+          );
+        });
+
+        eventSource.onerror = (error) => {
+          console.error('EventSource failed:', error);
+          setError(new Error('Failed to maintain realtime connection'));
+        };
+
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error('Failed to setup leaders'));
+      }
+    }
+
+    setupLeaders();
+
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+    };
+  }, []);
+
+  return { leaders, loading, error, toggleBanLeader };
 }

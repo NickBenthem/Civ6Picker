@@ -1,9 +1,7 @@
-import React, { useEffect, useCallback } from 'react';
+import React from 'react';
 import { Crown, Users, Ban, RefreshCw } from 'lucide-react';
 import { LeaderCard } from './LeaderCard';
-import { CursorOverlay } from './CursorOverlay';
 import { useLeaders } from '../hooks/useLeaders';
-import { useCursors } from '../hooks/useCursors';
 
 interface BanStageProps {
   userName: string;
@@ -11,17 +9,12 @@ interface BanStageProps {
 }
 
 export function BanStage({ userName, onBack }: BanStageProps) {
-  const { leaders, loading, toggleBanLeader, refetch } = useLeaders();
-  const { cursors, updateCursor } = useCursors(userName, userName);
+  const { leaders, loading, toggleBanLeader } = useLeaders();
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    updateCursor(e.clientX, e.clientY);
-  }, [updateCursor]);
-
-  const handleToggleBan = useCallback((leaderId: string) => {
+  const handleToggleBan = (leaderId: string) => {
     console.log('BanStage handleToggleBan called for:', leaderId, 'by:', userName);
     toggleBanLeader(leaderId, userName);
-  }, [toggleBanLeader, userName]);
+  };
 
   const bannedCount = leaders.filter(leader => leader.is_banned).length;
   const totalCount = leaders.length;
@@ -38,10 +31,7 @@ export function BanStage({ userName, onBack }: BanStageProps) {
   }
 
   return (
-    <div 
-      className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4"
-      onMouseMove={handleMouseMove}
-    >
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4 pb-32">
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-8">
         <div className="flex items-center justify-between mb-6">
@@ -55,14 +45,6 @@ export function BanStage({ userName, onBack }: BanStageProps) {
           
           <div className="flex items-center gap-3">
             <button
-              onClick={refetch}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2"
-              title="Refresh data"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </button>
-            <button
               onClick={onBack}
               className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
             >
@@ -70,47 +52,32 @@ export function BanStage({ userName, onBack }: BanStageProps) {
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-            <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-blue-400" />
-              <span className="text-gray-400">Active Players</span>
-            </div>
-            <p className="text-2xl font-bold text-white mt-1">{cursors.length + 1}</p>
+      {/* Summary Stats */}
+      <div className="max-w-7xl mx-auto mb-8">
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700 p-4 text-center">
+            <div className="text-2xl font-bold text-white mb-1">{totalCount}</div>
+            <div className="text-gray-400">Total Leaders</div>
           </div>
-          
-          <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-            <div className="flex items-center gap-2">
-              <Ban className="w-5 h-5 text-red-400" />
-              <span className="text-gray-400">Leaders Banned</span>
-            </div>
-            <p className="text-2xl font-bold text-white mt-1">{bannedCount}</p>
+          <div className="bg-red-900/80 backdrop-blur-sm rounded-lg border border-red-700 p-4 text-center">
+            <div className="text-2xl font-bold text-red-200 mb-1">{bannedCount}</div>
+            <div className="text-red-300">Banned</div>
           </div>
-          
-          <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-            <div className="flex items-center gap-2">
-              <Crown className="w-5 h-5 text-yellow-400" />
-              <span className="text-gray-400">Available</span>
-            </div>
-            <p className="text-2xl font-bold text-white mt-1">{totalCount - bannedCount}</p>
+          <div className="bg-green-900/80 backdrop-blur-sm rounded-lg border border-green-700 p-4 text-center">
+            <div className="text-2xl font-bold text-green-200 mb-1">{totalCount - bannedCount}</div>
+            <div className="text-green-300">Available</div>
           </div>
         </div>
       </div>
 
       {/* Leaders Grid */}
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto mb-24">
         {leaders.length === 0 ? (
           <div className="text-center py-12">
             <Crown className="w-16 h-16 text-gray-600 mx-auto mb-4" />
             <p className="text-gray-400 text-lg">No leaders found</p>
-            <button
-              onClick={refetch}
-              className="mt-4 px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-black rounded-lg transition-colors"
-            >
-              Retry Loading
-            </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -125,25 +92,29 @@ export function BanStage({ userName, onBack }: BanStageProps) {
         )}
       </div>
 
-      {/* Cursor Overlay */}
-      <CursorOverlay cursors={cursors} />
+      {/* Footer with Instructions and Stats */}
+      <div className="fixed bottom-0 left-0 right-0 bg-gray-800/95 backdrop-blur-sm border-t border-gray-700 shadow-lg">
+        <div className="max-w-7xl mx-auto p-4">
+          <div className="flex justify-between items-start">
+            {/* Instructions */}
+            <div className="flex-1 pr-4">
+              <h3 className="text-white font-semibold mb-2">How to Play</h3>
+              <ul className="text-sm text-gray-300 space-y-1">
+                <li>• Click on a leader to ban them</li>
+                <li>• Click on a banned leader to unban them</li>
+                <li>• All actions are visible to everyone</li>
+              </ul>
+            </div>
 
-      {/* Instructions */}
-      <div className="fixed bottom-4 left-4 bg-gray-800/90 backdrop-blur-sm rounded-lg p-4 border border-gray-700 max-w-xs">
-        <h3 className="text-white font-semibold mb-2">How to Play</h3>
-        <ul className="text-sm text-gray-300 space-y-1">
-          <li>• Click on a leader to ban them</li>
-          <li>• Click on a banned leader to unban them</li>
-          <li>• See other players' cursors in real-time</li>
-          <li>• All actions are visible to everyone</li>
-        </ul>
-      </div>
-
-      {/* Debug Info (remove in production) */}
-      <div className="fixed bottom-4 right-4 bg-gray-800/90 backdrop-blur-sm rounded-lg p-3 border border-gray-700 text-xs text-gray-400">
-        <div>Total Leaders: {totalCount}</div>
-        <div>Banned: {bannedCount}</div>
-        <div>Available: {totalCount - bannedCount}</div>
+            {/* Stats */}
+            <div className="text-right text-sm text-gray-300 bg-gray-900/50 px-4 py-2 rounded-lg border border-gray-700">
+              <div className="font-medium text-white mb-1">Leader Stats</div>
+              <div>Total Leaders: {totalCount}</div>
+              <div>Banned: {bannedCount}</div>
+              <div>Available: {totalCount - bannedCount}</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

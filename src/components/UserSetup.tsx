@@ -54,7 +54,6 @@ export function UserSetup({ onUserReady }: UserSetupProps) {
 
         <div className="mt-6 text-center text-sm text-gray-500">
           <p>Vote to ban leaders by clicking on them</p>
-          <p>See other players' cursors in real-time</p>
         </div>
       </div>
     </div>

@@ -17,7 +17,10 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
     uniqueInfra: leader.civilization?.unique_infrastructure?.[0]
   });
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     console.log('Leader card clicked:', leader.name, 'is_banned:', leader.is_banned);
     if (!disabled) {
       console.log('Calling onToggleBan for leader:', leader.id);
@@ -36,7 +39,6 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
         w-full max-w-[300px] relative group cursor-pointer transition-all duration-300 transform hover:scale-105
         ${disabled ? 'cursor-not-allowed opacity-50' : ''}
       `}
-      onClick={handleClick}
     >
       <div 
         className={`

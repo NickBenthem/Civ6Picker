@@ -1,62 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-console.log('Supabase URL:', supabaseUrl);
-console.log('Supabase Key length:', supabaseAnonKey?.length);
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-  },
-  global: {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  },
-});
-
-// Test the connection
-const testConnection = async () => {
-  const { data, error } = await supabase
-    .from('leaders')
-    .select(`
-      *,
-      civilizations!civilization_id (
-        id,
-        name,
-        image_key,
-        created_at,
-        unique_units (
-          id,
-          name,
-          image_key,
-          created_at
-        ),
-        unique_infrastructure (
-          id,
-          name,
-          image_key,
-          created_at
-        )
-      )
-    `);
-    
-  if (error) {
-    console.error('Supabase connection test failed:', error);
-  } else {
-    console.log('Supabase connection test successful:', data);
-  }
-};
-
-testConnection();
-
+// Types for the API response
 export type UniqueUnit = {
   id: string;
   civilization_id: string;
@@ -103,11 +45,31 @@ export type Vote = {
   created_at: string;
 };
 
-export type Cursor = {
-  user_id: string;
-  x: number;
-  y: number;
-  user_name: string;
-  color: string;
-  updated_at: string;
+const API_URL = 'https://ymllyikqdmsbldxfzmdl.supabase.co/functions/v1/fetch-leaders';
+
+// Function to fetch leaders
+export const fetchLeaders = async (): Promise<Leader[]> => {
+  try {
+    const response = await fetch(API_URL);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching leaders:', error);
+    throw error;
+  }
 };
+
+// Test the connection
+const testConnection = async () => {
+  try {
+    const leaders = await fetchLeaders();
+    console.log('API connection test successful:', leaders);
+  } catch (error) {
+    console.error('API connection test failed:', error);
+  }
+};
+
+testConnection();
