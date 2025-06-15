@@ -21,8 +21,8 @@ type PresencePayload = ConnectedUser & { presence_ref: string };
 /* ------------------------------------------------------------------ */
 /* Supabase client (singleton)                                         */
 /* ------------------------------------------------------------------ */
-const supabaseUrl  = import.meta.env.VITE_SUPABASE_URL  as string;
-const supabaseKey  = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const supabaseUrl  = import.meta.env.NEXT_PUBLIC_SUPABASE_URL  as string;
+const supabaseKey  = import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
 const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
 
 /* ------------------------------------------------------------------ */
