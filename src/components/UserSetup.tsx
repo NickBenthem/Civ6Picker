@@ -67,7 +67,7 @@ export function UserSetup({ onUserReady }: UserSetupProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-2 sm:p-4 mobile-container overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-start sm:items-center justify-center p-2 sm:p-4 mobile-container overflow-x-hidden pt-16 sm:pt-4">
       <div className="bg-gray-800 rounded-xl border-2 border-yellow-500/20 p-4 sm:p-6 lg:p-8 max-w-sm sm:max-w-md w-full shadow-2xl">
         <div className="text-center mb-4 sm:mb-6 lg:mb-8">
           <div className="inline-flex items-center gap-2 mb-3 sm:mb-4">
