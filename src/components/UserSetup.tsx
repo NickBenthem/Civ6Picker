@@ -29,12 +29,6 @@ export function UserSetup({ onUserReady }: UserSetupProps) {
         // Prevent any transform scaling
         document.body.style.transform = 'scale(1)';
         document.body.style.transformOrigin = 'top left';
-        
-        // Prevent scroll position changes
-        const currentScrollY = window.scrollY;
-        setTimeout(() => {
-          window.scrollTo(0, currentScrollY);
-        }, 0);
       }
     };
     
