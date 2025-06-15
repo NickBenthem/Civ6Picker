@@ -42,7 +42,7 @@ export function BanStage({ userName, onBack }: BanStageProps) {
     // Ensure the viewport meta tag is properly applied
     const viewport = document.querySelector('meta[name="viewport"]');
     if (viewport) {
-      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover');
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
     }
     
     // Force a reflow to ensure the viewport is properly reset
@@ -55,6 +55,11 @@ export function BanStage({ userName, onBack }: BanStageProps) {
       document.body.style.maxWidth = '100vw';
       document.body.style.overflowX = 'hidden';
     }
+    
+    // Ensure title is visible by scrolling to top after a brief delay
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 100);
   }, []);
 
   // Function to normalize text by removing diacritics
@@ -219,16 +224,16 @@ export function BanStage({ userName, onBack }: BanStageProps) {
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Crown className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-500 flex-shrink-0" />
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white truncate">Civ6 Leader Ban Stage</h1>
-              <p className="text-sm sm:text-base text-gray-400">Playing as: <span className="text-yellow-500 font-medium">{userName}</span></p>
+              <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-white truncate">Civ6 Leader Ban Stage</h1>
+              <p className="text-xs sm:text-sm lg:text-base text-gray-400">Playing as: <span className="text-yellow-500 font-medium">{userName}</span></p>
             </div>
           </div>
           
-          {/* User List - Moved to header */}
+          {/* User List - More compact on mobile */}
           <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700 p-2 sm:p-3 flex-shrink-0 w-full sm:w-[280px] sm:max-w-[400px]">
             <div className="flex items-center gap-2 text-gray-300 mb-1">
               <Users className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-              <span className="font-medium text-sm sm:text-base truncate">{connectedUsers.length} Online</span>
+              <span className="font-medium text-xs sm:text-sm lg:text-base truncate">{connectedUsers.length} Online</span>
               <div className="flex items-center gap-1 ml-auto flex-shrink-0">
                 <div 
                   className={`w-2 h-2 rounded-full ${
@@ -242,11 +247,11 @@ export function BanStage({ userName, onBack }: BanStageProps) {
                 </span>
               </div>
             </div>
-            <div className="flex flex-wrap gap-1 max-h-16 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
+            <div className="flex flex-wrap gap-1 max-h-12 sm:max-h-16 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
               {sortedConnectedUsers.map((u) => (
                 <div
                   key={u.id}
-                  className="text-xs sm:text-sm text-gray-400 bg-gray-700/50 px-2 py-1 rounded flex-shrink-0"
+                  className="text-xs sm:text-sm text-gray-400 bg-gray-700/50 px-1 sm:px-2 py-1 rounded flex-shrink-0"
                   title={u.name ?? undefined}
                 >
                   {u.name ?? 'Unknown'}
