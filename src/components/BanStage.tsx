@@ -2,6 +2,7 @@ import React from 'react';
 import { Crown, Users, Ban, RefreshCw } from 'lucide-react';
 import { LeaderCard } from './LeaderCard';
 import { useLeaders } from '../hooks/useLeaders';
+import { useUserPresence } from '../hooks/useUserPresence';
 
 interface BanStageProps {
   userName: string;
@@ -10,6 +11,7 @@ interface BanStageProps {
 
 export function BanStage({ userName, onBack }: BanStageProps) {
   const { leaders, loading, toggleBanLeader } = useLeaders();
+  const { connectedUsers, isConnected } = useUserPresence(userName);
 
   const handleToggleBan = (leaderId: string) => {
     console.log('BanStage handleToggleBan called for:', leaderId, 'by:', userName);
@@ -44,6 +46,20 @@ export function BanStage({ userName, onBack }: BanStageProps) {
           </div>
           
           <div className="flex items-center gap-3">
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700 p-3 min-w-[200px] max-w-[250px]">
+              <div className="flex items-center gap-2 text-gray-300 mb-2">
+                <Users className="w-5 h-5 flex-shrink-0" />
+                <span className="font-medium">{connectedUsers.length} Online</span>
+                <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'} ml-auto`} />
+              </div>
+              <div className="space-y-1 max-h-[120px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
+                {connectedUsers.map(user => (
+                  <div key={user.id} className="text-sm text-gray-400 truncate">
+                    {user.user_name}
+                  </div>
+                ))}
+              </div>
+            </div>
             <button
               onClick={onBack}
               className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"

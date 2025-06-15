@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS unique_units CASCADE;
 DROP TABLE IF EXISTS unique_infrastructure CASCADE;
 DROP TABLE IF EXISTS leaders CASCADE;
 DROP TABLE IF EXISTS civilizations CASCADE;
+DROP TABLE IF EXISTS connected_users CASCADE;
 
 -- Create civilizations table
 CREATE TABLE IF NOT EXISTS civilizations (
@@ -70,12 +71,21 @@ CREATE TABLE IF NOT EXISTS votes (
     ON DELETE CASCADE
 );
 
+-- Create connected_users table
+CREATE TABLE IF NOT EXISTS connected_users (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_name text NOT NULL UNIQUE,
+  last_seen timestamptz DEFAULT now(),
+  created_at timestamptz DEFAULT now()
+);
+
 -- Enable Row Level Security
 ALTER TABLE civilizations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE leaders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE unique_units ENABLE ROW LEVEL SECURITY;
 ALTER TABLE unique_infrastructure ENABLE ROW LEVEL SECURITY;
 ALTER TABLE votes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE connected_users ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for civilizations
 CREATE POLICY "Anyone can read civilizations"
@@ -123,3 +133,28 @@ CREATE POLICY "Anyone can insert votes"
   FOR INSERT
   TO anon, authenticated
   WITH CHECK (true);
+
+-- Create policies for connected_users
+CREATE POLICY "Anyone can read connected users"
+  ON connected_users
+  FOR SELECT
+  TO anon, authenticated
+  USING (true);
+
+CREATE POLICY "Anyone can insert connected users"
+  ON connected_users
+  FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (true);
+
+CREATE POLICY "Anyone can update connected users"
+  ON connected_users
+  FOR UPDATE
+  TO anon, authenticated
+  USING (true);
+
+CREATE POLICY "Anyone can delete connected users"
+  ON connected_users
+  FOR DELETE
+  TO anon, authenticated
+  USING (true);
