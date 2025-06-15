@@ -1,4 +1,3 @@
-
 -- Drop existing tables if they exist
 DROP TABLE IF EXISTS votes CASCADE;
 DROP TABLE IF EXISTS unique_units CASCADE;
@@ -11,6 +10,7 @@ CREATE TABLE IF NOT EXISTS civilizations (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
   image_key text NOT NULL,
+  civilization_bonus text,
   created_at timestamptz DEFAULT now()
 );
 

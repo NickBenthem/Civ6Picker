@@ -30,7 +30,7 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
   return (
     <div
       className={`
-        w-full max-w-[300px] h-[700px]                       /* wrapper */
+        w-full max-w-[300px] h-[800px]                       /* wrapper */
         relative group transition-all duration-300
         transform hover:scale-105
         ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
@@ -68,7 +68,7 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
 
             {/* Ban overlays */}
             {leader.is_banned && (
-              <div className="absolute inset-0 bg-gradient-to-br from-red-500/40 to-red-600/60 flex items-center justify-center">
+              <div className="absolute inset-0 bg-gradient-to-br from-red-500/40 to-red-600/60 flex items-center justify-center group-hover:opacity-0 transition-opacity duration-300">
                 <div className="text-center group-hover:scale-110 transform transition-transform duration-200">
                   <Ban className="w-10 h-10 text-red-100 mx-auto mb-1 drop-shadow-lg" />
                   <div className="text-red-100 font-bold text-xs bg-red-600/80 px-2 py-1 rounded">
@@ -116,11 +116,15 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
               ${leader.is_banned ? 'text-red-200' : 'text-white'}
             `}
           >
-            {leader.name}
+            <span>{leader.name.split('(')[0]}</span>
+            <br />
+            {leader.name.includes('(') && (
+              <span className="text-sm text-gray-400">({leader.name.split('(')[1]}</span>
+            )}
+            <span><br /></span>
           </h3>
           <p
-            className={`
-              text-sm truncate
+            className={`              text-sm truncate
               ${leader.is_banned ? 'text-red-300' : 'text-gray-400'}
             `}
           >
@@ -158,14 +162,33 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
           )}
         </div>
 
-        {/* 4. Ability description (flex-grow keeps cards equal height) */}
+        {/* 4. Civilization Bonus */}
+        {leader.civilization?.civilization_bonus && (
+          <div className="p-4 text-sm text-gray-300 bg-gray-900/50 overflow-hidden text-left">
+            <div className="font-semibold text-yellow-400 mb-2">Civilization Bonus:</div>
+            {leader.civilization.civilization_bonus
+              .split('.')
+              .map((s: string) => s.trim())
+              .filter(Boolean)
+              .map((sentence: string, i: number) => (
+                <li key={i} className="list-none">{sentence}.</li>
+              ))}
+          </div>
+        )}
+
+        {/* 5. Ability description (flex-grow keeps cards equal height) */}
         <div className="p-4 flex-grow text-sm text-gray-300 bg-gray-900/50 overflow-hidden text-left">
-          {abilityText.map((sentence, i) => (
-            <li key={i} className="list-none">{sentence}.</li>   
-          ))}
+          <div className="font-semibold text-yellow-400 mb-2">Leader Ability:</div>
+          <div className="relative h-[120px] overflow-hidden">
+            <div className="group-hover:animate-scroll-text absolute w-full pb-4">
+              {abilityText.map((sentence, i) => (
+                <li key={i} className="list-none mb-1">{sentence}.</li>   
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* 5. Ban footer */}
+        {/* 6. Ban footer */}
         {leader.is_banned && leader.banned_by && (
           <div className="p-4 flex items-center justify-center gap-1 text-xs text-red-300 bg-red-900/30">
             <User className="w-3 h-3" />
@@ -176,3 +199,4 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
     </div>
   );
 }
+

@@ -80,7 +80,14 @@ serve(async (req) => {
           banned_at: isBanned ? new Date().toISOString() : null,
         })
         .eq('id', leaderId)
-        .select('*, civilization:civilizations(*)')
+        .select(`
+          *,
+          civilization:civilizations (
+            *,
+            unique_units(*),
+            unique_infrastructure(*)
+          )
+        `)
         .single();
 
       if (updateError) {

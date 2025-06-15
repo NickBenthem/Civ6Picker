@@ -6,13 +6,9 @@ const API_URL = 'https://ymllyikqdmsbldxfzmdl.supabase.co/functions/v1';
 function sortLeaders(leaders: Leader[]): Leader[] {
   return [...leaders].sort((a, b) => {
     // First sort by civilization name
-    const civA = a.civilization?.name || '';
-    const civB = b.civilization?.name || '';
-    if (civA !== civB) {
-      return civA.localeCompare(civB);
-    }
-    // If same civilization, sort by leader name
-    return a.name.localeCompare(b.name);
+    const leaderA = a.name || '';
+    const leaderB = b.name || '';
+    return leaderA.localeCompare(leaderB);
   });
 }
 
@@ -45,8 +41,7 @@ export function useLeaders() {
                 ...leader,
                 is_banned: !leader.is_banned,
                 banned_by: !leader.is_banned ? userName : null,
-                banned_at: !leader.is_banned ? new Date().toISOString() : null,
-                civilization: leader.civilization // Preserve civilization data
+                banned_at: !leader.is_banned ? new Date().toISOString() : null
               }
             : leader
         ))
@@ -78,8 +73,7 @@ export function useLeaders() {
                 ...leader,
                 is_banned: currentLeader.is_banned,
                 banned_by: currentLeader.banned_by,
-                banned_at: currentLeader.banned_at,
-                civilization: currentLeader.civilization // Preserve civilization data
+                banned_at: currentLeader.banned_at
               }
             : leader
         ))

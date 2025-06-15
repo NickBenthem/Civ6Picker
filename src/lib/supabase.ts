@@ -19,6 +19,7 @@ export type Civilization = {
   id: string;
   name: string;
   image_key: string;
+  civilization_bonus: string;
   created_at: string;
   unique_units?: UniqueUnit[];
   unique_infrastructure?: UniqueInfrastructure[];
