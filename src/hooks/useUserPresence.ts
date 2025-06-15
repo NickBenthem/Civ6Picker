@@ -34,6 +34,7 @@ export function useUserPresence(userName: string) {
       }
 
       const { data } = await response.json();
+      console.log('Presence update response:', data);
       setConnectedUsers(data);
     } catch (e) {
       console.error('Error updating presence:', e);
@@ -46,13 +47,30 @@ export function useUserPresence(userName: string) {
     let reconnectTimeout: NodeJS.Timeout;
     let pingInterval: NodeJS.Timeout;
     let isComponentMounted = true;
+    let isInitialSetup = true;
+
+    // Handle page unload
+    const handleBeforeUnload = () => {
+      // Use sendBeacon for more reliable delivery during page unload
+      const data = new Blob(
+        [JSON.stringify({ userName, isOnline: false })],
+        { type: 'application/json' }
+      );
+      navigator.sendBeacon(`${API_URL}/user-presence`, data);
+    };
+
+    // Add beforeunload event listener
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     async function setupPresence() {
       if (!isComponentMounted) return;
 
       try {
-        // Initial presence update
-        await updatePresence(true);
+        // Only make initial presence update if this is the first setup
+        if (isInitialSetup) {
+          await updatePresence(true);
+          isInitialSetup = false;
+        }
 
         // Setup WebSocket connection
         const wsUrl = API_URL.replace('https://', 'wss://') + '/user-presence';
@@ -78,10 +96,14 @@ export function useUserPresence(userName: string) {
         ws.onmessage = (event) => {
           if (!isComponentMounted) return;
           try {
-            const { type, data } = JSON.parse(event.data);
-            if (type === 'presence-updated') {
-              console.log('Received presence update:', data);
-              setConnectedUsers(data);
+            const message = JSON.parse(event.data);
+            console.log('Received WebSocket message:', message);
+
+            if (message.type === 'presence-updated') {
+              console.log('Updating connected users:', message.data);
+              setConnectedUsers(message.data);
+            } else if (message.type === 'pong') {
+              console.log('Received pong');
             }
           } catch (e) {
             console.error('Error parsing WebSocket message:', e);
@@ -125,6 +147,9 @@ export function useUserPresence(userName: string) {
     // Cleanup function
     return () => {
       isComponentMounted = false;
+      
+      // Remove beforeunload event listener
+      window.removeEventListener('beforeunload', handleBeforeUnload);
       
       // Close WebSocket connection
       if (ws) {

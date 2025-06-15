@@ -20,6 +20,39 @@ presenceChannel.subscribe((status) => {
   console.log('Channel status:', status);
 });
 
+// Function to broadcast presence updates
+async function broadcastPresenceUpdate() {
+  try {
+    // Get all connected users
+    const { data: connectedUsers, error: fetchError } = await supabaseClient
+      .from('connected_users')
+      .select('*')
+      .order('last_seen', { ascending: false });
+
+    if (fetchError) throw fetchError;
+
+    console.log('Broadcasting to all clients:', connectedUsers);
+
+    // Broadcast the update to all connected clients using the shared channel
+    const { error: broadcastError } = await presenceChannel
+      .send({
+        type: 'broadcast',
+        event: 'presence-updated',
+        payload: connectedUsers,
+      });
+
+    if (broadcastError) {
+      console.error('Broadcast error:', broadcastError);
+      throw broadcastError;
+    }
+
+    return connectedUsers;
+  } catch (error) {
+    console.error('Error broadcasting presence update:', error);
+    throw error;
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -32,17 +65,26 @@ serve(async (req) => {
       const { socket, response } = Deno.upgradeWebSocket(req);
       console.log('New WebSocket connection established');
 
+      let isInitialConnection = true;
+
       // Subscribe to presence updates using the shared channel
       presenceChannel
         .on(
           'broadcast',
           { event: 'presence-updated' },
           (payload) => {
+            // Skip the first broadcast as it's redundant with the initial connection
+            if (isInitialConnection) {
+              isInitialConnection = false;
+              return;
+            }
             console.log('Broadcasting presence update:', payload);
-            socket.send(JSON.stringify({
+            const message = {
               type: 'presence-updated',
               data: payload.payload
-            }));
+            };
+            console.log('Sending WebSocket message:', message);
+            socket.send(JSON.stringify(message));
           }
         );
 
@@ -103,7 +145,18 @@ serve(async (req) => {
   // Handle POST requests for updating user presence
   if (req.method === 'POST') {
     try {
-      const { userName, isOnline } = await req.json();
+      let body;
+      const contentType = req.headers.get('content-type');
+      
+      if (contentType?.includes('application/json')) {
+        body = await req.json();
+      } else {
+        // Handle beacon request
+        const text = await req.text();
+        body = JSON.parse(text);
+      }
+
+      const { userName, isOnline } = body;
       console.log('Received presence update request:', { userName, isOnline });
 
       if (isOnline) {
@@ -128,28 +181,8 @@ serve(async (req) => {
         if (deleteError) throw deleteError;
       }
 
-      // Get all connected users
-      const { data: connectedUsers, error: fetchError } = await supabaseClient
-        .from('connected_users')
-        .select('*')
-        .order('last_seen', { ascending: false });
-
-      if (fetchError) throw fetchError;
-
-      console.log('Broadcasting to all clients:', connectedUsers);
-
-      // Broadcast the update to all connected clients using the shared channel
-      const { error: broadcastError } = await presenceChannel
-        .send({
-          type: 'broadcast',
-          event: 'presence-updated',
-          payload: connectedUsers,
-        });
-
-      if (broadcastError) {
-        console.error('Broadcast error:', broadcastError);
-        throw broadcastError;
-      }
+      // Broadcast the update to all clients
+      const connectedUsers = await broadcastPresenceUpdate();
 
       return new Response(
         JSON.stringify({ data: connectedUsers }),
