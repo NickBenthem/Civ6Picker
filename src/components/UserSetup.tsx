@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Crown } from 'lucide-react';
 
 interface UserSetupProps {
@@ -8,10 +8,27 @@ interface UserSetupProps {
 export function UserSetup({ onUserReady }: UserSetupProps) {
   const [userName, setUserName] = useState('');
 
+  // Reset viewport when component mounts and before transitioning
+  useEffect(() => {
+    // Ensure proper viewport on mount
+    const viewport = document.querySelector('meta[name="viewport"]');
+    if (viewport) {
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover');
+    }
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (userName.trim()) {
-      onUserReady(userName.trim());
+      // Reset viewport before transitioning to prevent zoom issues
+      window.scrollTo(0, 0);
+      document.body.style.transform = 'scale(1)';
+      document.body.style.transformOrigin = 'top left';
+      
+      // Small delay to ensure the reset takes effect before transition
+      setTimeout(() => {
+        onUserReady(userName.trim());
+      }, 50);
     }
   };
 

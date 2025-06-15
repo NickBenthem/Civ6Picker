@@ -25,6 +25,26 @@ export function BanStage({ userName, onBack }: BanStageProps) {
   const [windowWidth, setWindowWidth] = useState(0);
   const searchRef = useRef<HTMLDivElement>(null);
 
+  // Reset viewport when component mounts to fix mobile zoom issues
+  useEffect(() => {
+    // Reset any zoom that might have occurred from the previous component
+    // Scroll to top to reset any scroll position
+    window.scrollTo(0, 0);
+    
+    // Reset any transform that might be applied
+    document.body.style.transform = 'scale(1)';
+    document.body.style.transformOrigin = 'top left';
+    
+    // Ensure the viewport meta tag is properly applied
+    const viewport = document.querySelector('meta[name="viewport"]');
+    if (viewport) {
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover');
+    }
+    
+    // Force a reflow to ensure the viewport is properly reset
+    document.body.offsetHeight;
+  }, []);
+
   // Function to normalize text by removing diacritics
   const normalizeText = (text: string): string => {
     return text
