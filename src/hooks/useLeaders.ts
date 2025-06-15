@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { fetchLeaders, type Leader } from '../lib/supabase';
 
-const API_URL = 'https://ymllyikqdmsbldxfzmdl.supabase.co/functions/v1';
+const supabaseUrl  = import.meta.env.NEXT_PUBLIC_SUPABASE_URL  as string;
+
+const API_URL = `${supabaseUrl}/functions/v1`;
 
 function sortLeaders(leaders: Leader[]): Leader[] {
   return [...leaders].sort((a, b) => {

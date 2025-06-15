@@ -23,7 +23,13 @@ type PresencePayload = ConnectedUser & { presence_ref: string };
 /* ------------------------------------------------------------------ */
 const supabaseUrl  = import.meta.env.NEXT_PUBLIC_SUPABASE_URL  as string;
 const supabaseKey  = import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
-const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
+const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey, {
+  realtime: {
+    params: {
+      eventsPerSecond: 10
+    }
+  }
+});
 
 /* ------------------------------------------------------------------ */
 /* Presence hook                                                       */
@@ -79,11 +85,35 @@ export function useUserPresence(userId: string, name: string) {
 
       setConnectedUsers(everyone);
     };
-
+    const refreshFromState = () => {
+        const state: RealtimePresenceState<PresencePayload> =
+          channel.presenceState<PresencePayload>();
+    
+        setConnectedUsers(
+          Object.values(state)
+            .flat()
+            .map(({ presence_ref, ...rest }) => rest),
+        );
+      };
     channel
-      .on('presence', { event: 'sync' }, syncHandler)
-      .on('presence', { event: 'join'  }, ({ key }) => console.log(`${key} joined`))
-      .on('presence', { event: 'leave' }, ({ key }) => console.log(`${key} left`))
+        /* Full resync (first load or reconnect) */
+        .on('presence', { event: 'sync' }, refreshFromState)
+    
+        /* Diff events arrive instantly but we still mutate local state
+           so users show up in <1 s instead of waiting for the next sync. */
+        .on('presence', { event: 'join' }, ({ newPresences }) => {
+          setConnectedUsers((prev) => [
+            ...prev,
+            ...(newPresences as PresencePayload[]).map(({ presence_ref, ...rest }) => rest),
+          ]);
+        })
+        .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+          setConnectedUsers((prev) =>
+            prev.filter(
+              (u) => !leftPresences.some((l) => (l as PresencePayload).id === u.id),
+            ),
+          );
+        })
       .subscribe(async (status, err) => {
         if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
           setIsConnected(true);
