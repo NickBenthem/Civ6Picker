@@ -18,9 +18,6 @@ export function BanStageFooter({
       {windowWidth < 640 ? (
         // Mobile: stacked, animated, compact
         <div className="p-2">
-          {/* Debug info */}
-          <div className="text-xs text-red-400 mb-1">Debug: isScrolled = {isScrolled.toString()}, windowWidth = {windowWidth}</div>
-          
           <div className="flex flex-col items-center w-full gap-1">
             {/* Collapsible section - Conditionally rendered */}
             {!isScrolled && (

@@ -25,6 +25,7 @@ export function BanStage({ userName, onBack }: BanStageProps) {
   const [activeFilter, setActiveFilter] = useState<FilterOption>('all');
   const [isScrolled, setIsScrolled] = useState(false);
   const [windowWidth, setWindowWidth] = useState(0);
+  const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
 
   // Reset viewport when component mounts to fix mobile zoom issues
   useEffect(() => {
@@ -88,17 +89,29 @@ export function BanStage({ userName, onBack }: BanStageProps) {
 
   // Handle scrolling for mobile footer visibility with smooth transitions
   useEffect(() => {
+    if (!scrollContainer) {
+      return;
+    }
+    
     const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const maxScroll = 200; // Full transition over 200px of scroll
-      const progress = Math.min(scrollTop / maxScroll, 1);
+      const containerScrollTop = scrollContainer.scrollTop;
+      const windowScrollTop = window.scrollY;
       
-      setIsScrolled(scrollTop > 50);
+      // Use container scroll as primary, fallback to window scroll
+      const shouldBeScrolled = containerScrollTop > 5 || windowScrollTop > 5;
+      
+      setIsScrolled(shouldBeScrolled);
     };
 
+    // Listen to scroll events on both window and the container
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      scrollContainer.removeEventListener('scroll', handleScroll);
+    };
+  }, [scrollContainer]); // Only run when scrollContainer changes
 
   const handleToggleBan = (leaderId: string) => {
     console.log('BanStage handleToggleBan called for:', leaderId, 'by:', userName);
@@ -200,9 +213,9 @@ export function BanStage({ userName, onBack }: BanStageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col overflow-x-hidden">
+    <div className="h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col overflow-x-hidden">
       {/* Main content area - scrollable */}
-      <div className="flex-1 p-4 pb-32 mobile-container overflow-y-auto">
+      <div className="flex-1 p-4 pb-20 mobile-container overflow-y-auto" ref={setScrollContainer}>
         {/* Header */}
         <BanStageHeader
           userName={userName}
@@ -239,13 +252,15 @@ export function BanStage({ userName, onBack }: BanStageProps) {
         />
       </div>
 
-      {/* Footer */}
-      <BanStageFooter
-        windowWidth={windowWidth}
-        isScrolled={isScrolled}
-        totalCount={totalCount}
-        bannedCount={bannedCount}
-      />
+      {/* Sticky Footer */}
+      <div className="flex-shrink-0">
+        <BanStageFooter
+          windowWidth={windowWidth}
+          isScrolled={isScrolled}
+          totalCount={totalCount}
+          bannedCount={bannedCount}
+        />
+      </div>
     </div>
   );
 }
