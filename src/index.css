@@ -15,8 +15,18 @@ html, body {
 
 /* Prevent zoom on input focus */
 input, select, textarea {
-  font-size: 16px;
+  font-size: 16px !important;
   /* This prevents iOS from zooming when focusing on input fields */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  /* Prevent zoom on iOS */
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Ensure no transform scaling */
+  transform: scale(1) !important;
+  transform-origin: top left;
 }
 
 /* Ensure all elements respect viewport width */

@@ -13,8 +13,33 @@ export function UserSetup({ onUserReady }: UserSetupProps) {
     // Ensure proper viewport on mount
     const viewport = document.querySelector('meta[name="viewport"]');
     if (viewport) {
-      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover');
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
     }
+    
+    // Prevent zoom on input focus
+    const preventZoom = (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
+        // Force viewport to stay at scale 1
+        const viewport = document.querySelector('meta[name="viewport"]');
+        if (viewport) {
+          viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+        }
+        
+        // Prevent any transform scaling
+        document.body.style.transform = 'scale(1)';
+        document.body.style.transformOrigin = 'top left';
+      }
+    };
+    
+    // Add event listeners
+    document.addEventListener('focusin', preventZoom);
+    document.addEventListener('touchstart', preventZoom);
+    
+    return () => {
+      document.removeEventListener('focusin', preventZoom);
+      document.removeEventListener('touchstart', preventZoom);
+    };
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -53,10 +78,11 @@ export function UserSetup({ onUserReady }: UserSetupProps) {
               id="userName"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
-              className="w-full px-3 sm:px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 text-base sm:text-base"
               placeholder="Enter your name..."
               maxLength={20}
               required
+              style={{ fontSize: '16px', transform: 'scale(1)', transformOrigin: 'top left' }}
             />
           </div>
 
