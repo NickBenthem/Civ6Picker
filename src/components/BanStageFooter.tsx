@@ -14,7 +14,13 @@ export function BanStageFooter({
   bannedCount
 }: BanStageFooterProps) {
   return (
-    <div className="bg-gray-800/95 backdrop-blur-sm border-t border-gray-700 shadow-lg">
+    <div className="bg-gray-800/95 backdrop-blur-sm border-t border-gray-700 shadow-lg" style={{ 
+      position: 'relative',
+      zIndex: 10,
+      // iOS Safari specific fixes
+      WebkitTransform: 'translateZ(0)',
+      transform: 'translateZ(0)'
+    }}>
       {windowWidth < 640 ? (
         // Mobile: stacked, animated, compact
         <div className="p-2">

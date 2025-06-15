@@ -29,46 +29,20 @@ export function BanStage({ userName, onBack }: BanStageProps) {
 
   // Reset viewport when component mounts to fix mobile zoom issues
   useEffect(() => {
-    // Immediately reset scroll position
+    // Simple scroll reset
     window.scrollTo(0, 0);
     
-    // Reset any zoom that might have occurred from the previous component
-    document.body.style.transform = 'scale(1)';
-    document.body.style.transformOrigin = 'top left';
-    
-    // Ensure no horizontal scroll
-    document.body.style.overflowX = 'hidden';
-    document.documentElement.style.overflowX = 'hidden';
+    // Basic mobile fixes without aggressive manipulation
+    if (window.innerWidth <= 768) {
+      document.body.style.overflowX = 'hidden';
+      document.documentElement.style.overflowX = 'hidden';
+    }
     
     // Ensure the viewport meta tag is properly applied
     const viewport = document.querySelector('meta[name="viewport"]');
     if (viewport) {
       viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
     }
-    
-    // Force a reflow to ensure the viewport is properly reset
-    document.body.offsetHeight;
-    
-    // Additional mobile-specific fixes
-    if (window.innerWidth <= 768) {
-      // On mobile, ensure the body doesn't exceed viewport width
-      document.body.style.width = '100vw';
-      document.body.style.maxWidth = '100vw';
-      document.body.style.overflowX = 'hidden';
-    }
-    
-    // Multiple scroll resets to ensure it takes effect
-    setTimeout(() => {
-      window.scrollTo(0, 0);
-    }, 50);
-    
-    setTimeout(() => {
-      window.scrollTo(0, 0);
-    }, 100);
-    
-    setTimeout(() => {
-      window.scrollTo(0, 0);
-    }, 200);
   }, []);
 
   // Function to normalize text by removing diacritics
@@ -213,7 +187,7 @@ export function BanStage({ userName, onBack }: BanStageProps) {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col overflow-x-hidden" style={{ height: '100vh' }}>
       {/* Main content area - scrollable */}
       <div className="flex-1 p-4 pb-20 mobile-container overflow-y-auto" ref={setScrollContainer}>
         {/* Header */}
