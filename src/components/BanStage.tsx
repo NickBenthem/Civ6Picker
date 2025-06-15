@@ -132,6 +132,15 @@ export function BanStage({ userName, onBack }: BanStageProps) {
   const bannedCount = leaders.filter(leader => leader.is_banned).length;
   const totalCount = leaders.length;
 
+  // Sort connected users by who joined first (online_at timestamp)
+  const sortedConnectedUsers = useMemo(() => {
+    return [...connectedUsers].sort((a, b) => {
+      const timeA = new Date(a.online_at).getTime();
+      const timeB = new Date(b.online_at).getTime();
+      return timeA - timeB; // Sort by earliest first
+    });
+  }, [connectedUsers]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
@@ -146,20 +155,51 @@ export function BanStage({ userName, onBack }: BanStageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4 pb-32 mobile-container">
       {/* Header */}
-      <div className="max-w-7xl mx-auto mb-6 sm:mb-8">
+      <div className="max-w-7xl mx-auto mb-4 sm:mb-6">
         {/* Title and User Info */}
-        <div className="flex items-center gap-3 mb-4 sm:mb-6">
+        <div className="flex items-center gap-3 mb-3 sm:mb-4">
           <Crown className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-500 flex-shrink-0" />
           <div className="min-w-0 flex-1">
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white truncate">Civ6 Leader Ban Stage</h1>
             <p className="text-sm sm:text-base text-gray-400">Playing as: <span className="text-yellow-500 font-medium">{userName}</span></p>
           </div>
+          
+          {/* User List - Moved to header */}
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700 p-2 sm:p-3 flex-shrink-0 sm:w-[280px] sm:max-w-[400px]">
+            <div className="flex items-center gap-2 text-gray-300 mb-1">
+              <Users className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+              <span className="font-medium text-sm sm:text-base truncate">{connectedUsers.length} Online</span>
+              <div className="flex items-center gap-1 ml-auto flex-shrink-0">
+                <div 
+                  className={`w-2 h-2 rounded-full ${
+                    isConnected 
+                      ? 'bg-green-500 animate-pulse' 
+                      : 'bg-red-500'
+                  }`} 
+                />
+                <span className="text-xs text-gray-400 hidden sm:inline">
+                  {isConnected ? 'Connected' : 'Disconnected'}
+                </span>
+              </div>
+            </div>
+            <div className="grid grid-rows-2 auto-cols-max gap-1 max-w-[280px] overflow-x-auto grid-flow-col scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
+              {sortedConnectedUsers.map((u) => (
+                <div
+                  key={u.id}
+                  className="text-xs sm:text-sm text-gray-400 bg-gray-700/50 px-2 py-1 rounded flex-shrink-0"
+                  title={u.name ?? undefined}
+                >
+                  {u.name ?? 'Unknown'}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* Controls Section - Stack vertically on mobile */}
-        <div className="space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-3">
+        {/* Controls Section - More compact and horizontal */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           {/* Sort Options */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <span className="text-sm sm:text-base text-white font-medium">Sort by:</span>
             <div className="relative">
               <button
@@ -200,7 +240,7 @@ export function BanStage({ userName, onBack }: BanStageProps) {
           </div>
 
           {/* Search Bar */}
-          <div className="relative flex-1 sm:max-w-xs" ref={searchRef}>
+          <div className="relative flex-1" ref={searchRef}>
             <div className="flex items-center bg-gray-800/80 backdrop-blur-sm border border-gray-700 rounded-lg px-3 py-2">
               <Search className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
               <input
@@ -246,47 +286,16 @@ export function BanStage({ userName, onBack }: BanStageProps) {
               </div>
             )}
           </div>
-
-          {/* User List */}
-          <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700 p-3 min-w-0 sm:min-w-[200px] sm:max-w-[250px]">
-            <div className="flex items-center gap-2 text-gray-300 mb-2">
-              <Users className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-              <span className="font-medium text-sm sm:text-base truncate">{connectedUsers.length} Online</span>
-              <div className="flex items-center gap-1 ml-auto flex-shrink-0">
-                <div 
-                  className={`w-2 h-2 rounded-full ${
-                    isConnected 
-                      ? 'bg-green-500 animate-pulse' 
-                      : 'bg-red-500'
-                  }`} 
-                />
-                <span className="text-xs text-gray-400 hidden sm:inline">
-                  {isConnected ? 'Connected' : 'Disconnected'}
-                </span>
-              </div>
-            </div>
-            <div className="space-y-1 max-h-[80px] sm:max-h-[120px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
-              {connectedUsers.map((u) => (
-                <div
-                  key={u.id}
-                  className="text-xs sm:text-sm text-gray-400 truncate"
-                  title={u.name ?? undefined}
-                >
-                  {u.name ?? 'Unknown'}
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 
       {/* Filter Buttons */}
-      <div className="max-w-7xl mx-auto mb-6 sm:mb-8">
-        <div className="grid grid-cols-3 gap-3 sm:gap-4">
+      <div className="max-w-7xl mx-auto mb-4 sm:mb-6">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <button
             onClick={() => setActiveFilter('all')}
             className={`
-              backdrop-blur-sm rounded-lg border p-3 sm:p-4 text-center transition-all duration-200 relative
+              backdrop-blur-sm rounded-lg border p-2 sm:p-3 text-center transition-all duration-200 relative
               ${activeFilter === 'all' 
                 ? 'bg-yellow-900/80 border-yellow-500 shadow-lg shadow-yellow-500/20' 
                 : 'bg-gray-800/80 border-gray-700 hover:bg-gray-700/80 hover:border-gray-600'
@@ -296,18 +305,18 @@ export function BanStage({ userName, onBack }: BanStageProps) {
             {activeFilter === 'all' && (
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full border-2 border-gray-900"></div>
             )}
-            <div className={`text-lg sm:text-2xl font-bold mb-1 ${activeFilter === 'all' ? 'text-yellow-200' : 'text-white'}`}>
+            <div className={`text-base sm:text-xl font-bold ${activeFilter === 'all' ? 'text-yellow-200' : 'text-white'}`}>
               {totalCount}
             </div>
             <div className={`text-xs sm:text-sm ${activeFilter === 'all' ? 'text-yellow-300' : 'text-gray-400'}`}>
-              Total Leaders
+              Total
             </div>
           </button>
           
           <button
             onClick={() => setActiveFilter('banned')}
             className={`
-              backdrop-blur-sm rounded-lg border p-3 sm:p-4 text-center transition-all duration-200 relative
+              backdrop-blur-sm rounded-lg border p-2 sm:p-3 text-center transition-all duration-200 relative
               ${activeFilter === 'banned' 
                 ? 'bg-red-900/80 border-red-500 shadow-lg shadow-red-500/20' 
                 : 'bg-red-900/80 border-red-700 hover:bg-red-800/80 hover:border-red-600'
@@ -317,7 +326,7 @@ export function BanStage({ userName, onBack }: BanStageProps) {
             {activeFilter === 'banned' && (
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-gray-900"></div>
             )}
-            <div className={`text-lg sm:text-2xl font-bold mb-1 ${activeFilter === 'banned' ? 'text-red-200' : 'text-red-200'}`}>
+            <div className={`text-base sm:text-xl font-bold ${activeFilter === 'banned' ? 'text-red-200' : 'text-red-200'}`}>
               {bannedCount}
             </div>
             <div className={`text-xs sm:text-sm ${activeFilter === 'banned' ? 'text-red-300' : 'text-red-300'}`}>
@@ -328,7 +337,7 @@ export function BanStage({ userName, onBack }: BanStageProps) {
           <button
             onClick={() => setActiveFilter('available')}
             className={`
-              backdrop-blur-sm rounded-lg border p-3 sm:p-4 text-center transition-all duration-200 relative
+              backdrop-blur-sm rounded-lg border p-2 sm:p-3 text-center transition-all duration-200 relative
               ${activeFilter === 'available' 
                 ? 'bg-green-900/80 border-green-500 shadow-lg shadow-green-500/20' 
                 : 'bg-green-900/80 border-green-700 hover:bg-green-800/80 hover:border-green-600'
@@ -338,7 +347,7 @@ export function BanStage({ userName, onBack }: BanStageProps) {
             {activeFilter === 'available' && (
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></div>
             )}
-            <div className={`text-lg sm:text-2xl font-bold mb-1 ${activeFilter === 'available' ? 'text-green-200' : 'text-green-200'}`}>
+            <div className={`text-base sm:text-xl font-bold ${activeFilter === 'available' ? 'text-green-200' : 'text-green-200'}`}>
               {totalCount - bannedCount}
             </div>
             <div className={`text-xs sm:text-sm ${activeFilter === 'available' ? 'text-green-300' : 'text-green-300'}`}>
@@ -385,31 +394,32 @@ export function BanStage({ userName, onBack }: BanStageProps) {
 
       {/* Footer with Instructions and Stats */}
       <div className="fixed bottom-0 left-0 right-0 bg-gray-800/95 backdrop-blur-sm border-t border-gray-700 shadow-lg">
-        <div className="max-w-7xl mx-auto p-3 sm:p-4">
-          <div className="flex flex-col sm:flex-row justify-between items-stretch gap-3 sm:gap-4">
+        <div className="max-w-7xl mx-auto p-2 sm:p-3">
+          <div className="flex flex-row justify-between items-center gap-2 sm:gap-4">
             {/* Instructions */}
-            <div className="flex-1 bg-gray-900/50 px-3 sm:px-4 py-3 sm:py-4 rounded-lg border border-gray-700 flex flex-col justify-center">
-              <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">How to use</h3>
-              <ul className="text-xs sm:text-sm text-gray-300 space-y-1">
-                <li>Click on a leader to ban them</li>
-                <li>Click on a banned leader to unban them</li>
-              </ul>
+            <div className="flex-1 bg-gray-900/50 px-3 sm:px-4 py-2 rounded-lg border border-gray-700">
+              <div className="flex items-center gap-2">
+                <span className="text-white font-semibold text-sm sm:text-base">How to use:</span>
+                <span className="text-xs sm:text-sm text-gray-300">Click to ban/unban leaders</span>
+              </div>
             </div>
 
             {/* Attribution */}
-            <div className="flex-1 bg-gray-900/50 px-3 sm:px-4 py-3 sm:py-4 rounded-lg border border-gray-700 text-center flex flex-col justify-center">
-              <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">
+            <div className="flex-1 bg-gray-900/50 px-3 sm:px-4 py-2 rounded-lg border border-gray-700 text-center">
+              <span className="text-white font-semibold text-sm sm:text-base">
                 Created by <a href="https://github.com/nickbenthem" target="_blank" rel="noopener noreferrer" className="text-yellow-500 hover:text-yellow-400 transition-colors">NickBenthem</a>
-              </h3>
+              </span>
             </div>
 
             {/* Stats */}
-            <div className="flex-1 bg-gray-900/50 px-3 sm:px-4 py-3 sm:py-4 rounded-lg border border-gray-700 text-right flex flex-col justify-center">
-              <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">Leader Stats</h3>
-              <div className="text-xs sm:text-sm text-gray-300">
-                <div>Total Leaders: {totalCount}</div>
-                <div>Banned: {bannedCount}</div>
-                <div>Available: {totalCount - bannedCount}</div>
+            <div className="flex-1 bg-gray-900/50 px-3 sm:px-4 py-2 rounded-lg border border-gray-700 text-right">
+              <div className="flex items-center justify-end gap-4">
+                <span className="text-white font-semibold text-sm sm:text-base">Stats:</span>
+                <div className="text-xs sm:text-sm text-gray-300 flex gap-3">
+                  <span>Total: {totalCount}</span>
+                  <span>Banned: {bannedCount}</span>
+                  <span>Available: {totalCount - bannedCount}</span>
+                </div>
               </div>
             </div>
           </div>
