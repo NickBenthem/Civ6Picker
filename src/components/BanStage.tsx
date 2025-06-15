@@ -188,11 +188,18 @@ export function BanStage({ userName, onBack }: BanStageProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col overflow-x-hidden" style={{ 
-      height: '100vh',
-      paddingBottom: 'env(safe-area-inset-bottom)'
+      height: '100vh'
     }}>
       {/* Main content area - scrollable */}
-      <div className="flex-1 p-4 pb-20 mobile-container overflow-y-auto" ref={setScrollContainer}>
+      <div 
+        className="flex-1 p-4 overflow-y-auto" 
+        ref={setScrollContainer}
+        style={{
+          // Add bottom padding to account for fixed footer
+          // Use a larger value to ensure content is visible above the footer
+          paddingBottom: 'calc(env(safe-area-inset-bottom) + 140px)'
+        }}
+      >
         {/* Header */}
         <BanStageHeader
           userName={userName}

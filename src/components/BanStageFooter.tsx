@@ -14,15 +14,24 @@ export function BanStageFooter({
   bannedCount
 }: BanStageFooterProps) {
   return (
-    <div className="bg-gray-800/95 backdrop-blur-sm border-t border-gray-700 shadow-lg" style={{ 
-      position: 'relative',
-      zIndex: 10,
-      // iOS Safari specific fixes
-      WebkitTransform: 'translateZ(0)',
-      transform: 'translateZ(0)',
-      // Safe area inset for iPhone
-      paddingBottom: 'env(safe-area-inset-bottom)'
-    }}>
+    <div 
+      className="bg-gray-800/95 backdrop-blur-sm border-t border-gray-700 shadow-lg" 
+      style={{ 
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        // iOS Safari specific fixes
+        WebkitTransform: 'translateZ(0)',
+        transform: 'translateZ(0)',
+        // Safe area insets for iPhone - use calc to ensure proper positioning
+        paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)',
+        paddingTop: '8px',
+        // Ensure the footer is above browser UI
+        WebkitOverflowScrolling: 'touch'
+      }}
+    >
       {windowWidth < 640 ? (
         // Mobile: stacked, animated, compact
         <div className="p-2">
