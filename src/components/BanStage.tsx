@@ -118,23 +118,32 @@ export function BanStage({ userName, onBack }: BanStageProps) {
       {/* Footer with Instructions and Stats */}
       <div className="fixed bottom-0 left-0 right-0 bg-gray-800/95 backdrop-blur-sm border-t border-gray-700 shadow-lg">
         <div className="max-w-7xl mx-auto p-4">
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-stretch gap-4">
             {/* Instructions */}
-            <div className="flex-1 pr-4">
-              <h3 className="text-white font-semibold mb-2">How to Play</h3>
+            <div className="flex-1 bg-gray-900/50 px-4 py-4 rounded-lg border border-gray-700 flex flex-col justify-center">
+              <h3 className="text-white font-semibold mb-2">How to use</h3>
               <ul className="text-sm text-gray-300 space-y-1">
-                <li>• Click on a leader to ban them</li>
-                <li>• Click on a banned leader to unban them</li>
-                <li>• All actions are visible to everyone</li>
+                <li>Click on a leader to ban them</li>
+                <li>Click on a banned leader to unban them</li>
               </ul>
             </div>
 
+            {/* Attribution */}
+            <div className="flex-1 bg-gray-900/50 px-4 py-4 rounded-lg border border-gray-700 text-center flex flex-col justify-center">
+              {/* <h3 className="text-white font-semibold mb-2">About</h3> */}
+              <h3 className="text-white font-semibold mb-2">
+                Created by <a href="https://github.com/nickbenthem" target="_blank" rel="noopener noreferrer" className="text-yellow-500 hover:text-yellow-400 transition-colors">NickBenthem</a>
+              </h3>
+            </div>
+
             {/* Stats */}
-            <div className="text-right text-sm text-gray-300 bg-gray-900/50 px-4 py-2 rounded-lg border border-gray-700">
-              <div className="font-medium text-white mb-1">Leader Stats</div>
-              <div>Total Leaders: {totalCount}</div>
-              <div>Banned: {bannedCount}</div>
-              <div>Available: {totalCount - bannedCount}</div>
+            <div className="flex-1 bg-gray-900/50 px-4 py-4 rounded-lg border border-gray-700 text-right flex flex-col justify-center">
+              <h3 className="text-white font-semibold mb-2">Leader Stats</h3>
+              <div className="text-sm text-gray-300">
+                <div>Total Leaders: {totalCount}</div>
+                <div>Banned: {bannedCount}</div>
+                <div>Available: {totalCount - bannedCount}</div>
+              </div>
             </div>
           </div>
         </div>
