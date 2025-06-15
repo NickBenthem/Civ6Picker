@@ -34,6 +34,7 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
         relative group transition-all duration-300
         transform hover:scale-105
         ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+        overflow-hidden
       `}
     >
       <div
