@@ -10,6 +10,7 @@ interface BanStageProps {
 }
 
 type SortOption = 'civilization' | 'leader';
+type FilterOption = 'all' | 'banned' | 'available';
 
 export function BanStage({ userName, onBack }: BanStageProps) {
   const { leaders, loading, toggleBanLeader } = useLeaders();
@@ -18,6 +19,7 @@ export function BanStage({ userName, onBack }: BanStageProps) {
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<FilterOption>('all');
   const searchRef = useRef<HTMLDivElement>(null);
 
   // Function to normalize text by removing diacritics
@@ -60,18 +62,29 @@ export function BanStage({ userName, onBack }: BanStageProps) {
   }, [leaders, sortBy]);
 
   const filteredLeaders = useMemo(() => {
+    // First apply the active filter
+    let filtered = sortedLeaders;
+    
+    if (activeFilter === 'banned') {
+      filtered = filtered.filter(leader => leader.is_banned);
+    } else if (activeFilter === 'available') {
+      filtered = filtered.filter(leader => !leader.is_banned);
+    }
+    // 'all' filter shows everyone, so no additional filtering needed
+    
+    // Then apply search query if present
     if (!searchQuery.trim()) {
-      return sortedLeaders;
+      return filtered;
     }
     
     const query = normalizeText(searchQuery);
-    return sortedLeaders.filter(leader => {
+    return filtered.filter(leader => {
       const leaderName = normalizeText(leader.name);
       const civName = normalizeText(leader.civilization?.name || '');
       
       return leaderName.includes(query) || civName.includes(query);
     });
-  }, [sortedLeaders, searchQuery]);
+  }, [sortedLeaders, searchQuery, activeFilter]);
 
   const autocompleteSuggestions = useMemo(() => {
     if (!searchQuery.trim() || searchQuery.length < 2) {
@@ -79,7 +92,17 @@ export function BanStage({ userName, onBack }: BanStageProps) {
     }
     
     const query = normalizeText(searchQuery);
-    const suggestions = leaders
+    // For autocomplete, we want to search through all leaders regardless of filter
+    // but respect the current filter for the suggestions
+    let searchableLeaders = leaders;
+    
+    if (activeFilter === 'banned') {
+      searchableLeaders = searchableLeaders.filter(leader => leader.is_banned);
+    } else if (activeFilter === 'available') {
+      searchableLeaders = searchableLeaders.filter(leader => !leader.is_banned);
+    }
+    
+    const suggestions = searchableLeaders
       .filter(leader => {
         const leaderName = normalizeText(leader.name);
         const civName = normalizeText(leader.civilization?.name || '');
@@ -94,7 +117,7 @@ export function BanStage({ userName, onBack }: BanStageProps) {
       }));
     
     return suggestions;
-  }, [leaders, searchQuery]);
+  }, [leaders, searchQuery, activeFilter]);
 
   const handleSearchSelect = (leaderName: string) => {
     setSearchQuery(leaderName);
@@ -121,28 +144,30 @@ export function BanStage({ userName, onBack }: BanStageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4 pb-32">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4 pb-32 mobile-container">
       {/* Header */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <Crown className="w-8 h-8 text-yellow-500" />
-            <div>
-              <h1 className="text-3xl font-bold text-white">Civ6 Leader Ban Stage</h1>
-              <p className="text-gray-400">Playing as: <span className="text-yellow-500 font-medium">{userName}</span></p>
-            </div>
+      <div className="max-w-7xl mx-auto mb-6 sm:mb-8">
+        {/* Title and User Info */}
+        <div className="flex items-center gap-3 mb-4 sm:mb-6">
+          <Crown className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-500 flex-shrink-0" />
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white truncate">Civ6 Leader Ban Stage</h1>
+            <p className="text-sm sm:text-base text-gray-400">Playing as: <span className="text-yellow-500 font-medium">{userName}</span></p>
           </div>
-          
+        </div>
+
+        {/* Controls Section - Stack vertically on mobile */}
+        <div className="space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-3">
           {/* Sort Options */}
-          <div className="flex items-center gap-3">
-            <span className="text-white font-medium">Sort by:</span>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="text-sm sm:text-base text-white font-medium">Sort by:</span>
             <div className="relative">
               <button
                 onClick={() => setShowSortDropdown(!showSortDropdown)}
-                className="flex items-center gap-2 bg-gray-800/80 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-2 text-white hover:bg-gray-700/80 transition-colors"
+                className="flex items-center gap-2 bg-gray-800/80 backdrop-blur-sm border border-gray-700 rounded-lg px-3 py-2 text-sm sm:text-base text-white hover:bg-gray-700/80 transition-colors"
               >
-                <span>{sortBy === 'civilization' ? 'Civilization' : 'Leader Name'}</span>
-                <ChevronDown className={`w-4 h-4 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
+                <span className="truncate">{sortBy === 'civilization' ? 'Civilization' : 'Leader Name'}</span>
+                <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
               </button>
               
               {showSortDropdown && (
@@ -175,9 +200,9 @@ export function BanStage({ userName, onBack }: BanStageProps) {
           </div>
 
           {/* Search Bar */}
-          <div className="relative" ref={searchRef}>
+          <div className="relative flex-1 sm:max-w-xs" ref={searchRef}>
             <div className="flex items-center bg-gray-800/80 backdrop-blur-sm border border-gray-700 rounded-lg px-3 py-2">
-              <Search className="w-4 h-4 text-gray-400 mr-2" />
+              <Search className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
               <input
                 type="text"
                 value={searchQuery}
@@ -186,13 +211,19 @@ export function BanStage({ userName, onBack }: BanStageProps) {
                   setShowAutocomplete(true);
                 }}
                 onFocus={() => setShowAutocomplete(true)}
-                placeholder="Search leaders..."
-                className="bg-transparent text-white placeholder-gray-400 outline-none min-w-[200px]"
+                placeholder={
+                  activeFilter === 'all' 
+                    ? "Search all leaders..." 
+                    : activeFilter === 'banned' 
+                    ? "Search banned leaders..." 
+                    : "Search available leaders..."
+                }
+                className="bg-transparent text-white placeholder-gray-400 outline-none flex-1 min-w-0 text-sm sm:text-base"
               />
               {searchQuery && (
                 <button
                   onClick={handleClearSearch}
-                  className="ml-2 text-gray-400 hover:text-white transition-colors"
+                  className="ml-2 text-gray-400 hover:text-white transition-colors flex-shrink-0"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -208,19 +239,20 @@ export function BanStage({ userName, onBack }: BanStageProps) {
                     onClick={() => handleSearchSelect(suggestion.name)}
                     className="w-full text-left px-4 py-3 hover:bg-gray-700/80 transition-colors border-b border-gray-700 last:border-b-0"
                   >
-                    <div className="text-white font-medium">{suggestion.name}</div>
-                    <div className="text-sm text-gray-400">{suggestion.civilization}</div>
+                    <div className="text-white font-medium text-sm sm:text-base">{suggestion.name}</div>
+                    <div className="text-xs sm:text-sm text-gray-400">{suggestion.civilization}</div>
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700 p-3 min-w-[200px] max-w-[250px]">
+          {/* User List */}
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700 p-3 min-w-0 sm:min-w-[200px] sm:max-w-[250px]">
             <div className="flex items-center gap-2 text-gray-300 mb-2">
-              <Users className="w-5 h-5 flex-shrink-0" />
-              <span className="font-medium">{connectedUsers.length} Online</span>
-              <div className="flex items-center gap-1 ml-auto">
+              <Users className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+              <span className="font-medium text-sm sm:text-base truncate">{connectedUsers.length} Online</span>
+              <div className="flex items-center gap-1 ml-auto flex-shrink-0">
                 <div 
                   className={`w-2 h-2 rounded-full ${
                     isConnected 
@@ -228,16 +260,16 @@ export function BanStage({ userName, onBack }: BanStageProps) {
                       : 'bg-red-500'
                   }`} 
                 />
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-400 hidden sm:inline">
                   {isConnected ? 'Connected' : 'Disconnected'}
                 </span>
               </div>
             </div>
-            <div className="space-y-1 max-h-[120px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
+            <div className="space-y-1 max-h-[80px] sm:max-h-[120px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
               {connectedUsers.map((u) => (
                 <div
                   key={u.id}
-                  className="text-sm text-gray-400 truncate"
+                  className="text-xs sm:text-sm text-gray-400 truncate"
                   title={u.name ?? undefined}
                 >
                   {u.name ?? 'Unknown'}
@@ -248,30 +280,95 @@ export function BanStage({ userName, onBack }: BanStageProps) {
         </div>
       </div>
 
-      {/* Summary Stats */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700 p-4 text-center">
-            <div className="text-2xl font-bold text-white mb-1">{totalCount}</div>
-            <div className="text-gray-400">Total Leaders</div>
-          </div>
-          <div className="bg-red-900/80 backdrop-blur-sm rounded-lg border border-red-700 p-4 text-center">
-            <div className="text-2xl font-bold text-red-200 mb-1">{bannedCount}</div>
-            <div className="text-red-300">Banned</div>
-          </div>
-          <div className="bg-green-900/80 backdrop-blur-sm rounded-lg border border-green-700 p-4 text-center">
-            <div className="text-2xl font-bold text-green-200 mb-1">{totalCount - bannedCount}</div>
-            <div className="text-green-300">Available</div>
-          </div>
+      {/* Filter Buttons */}
+      <div className="max-w-7xl mx-auto mb-6 sm:mb-8">
+        <div className="grid grid-cols-3 gap-3 sm:gap-4">
+          <button
+            onClick={() => setActiveFilter('all')}
+            className={`
+              backdrop-blur-sm rounded-lg border p-3 sm:p-4 text-center transition-all duration-200 relative
+              ${activeFilter === 'all' 
+                ? 'bg-yellow-900/80 border-yellow-500 shadow-lg shadow-yellow-500/20' 
+                : 'bg-gray-800/80 border-gray-700 hover:bg-gray-700/80 hover:border-gray-600'
+              }
+            `}
+          >
+            {activeFilter === 'all' && (
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full border-2 border-gray-900"></div>
+            )}
+            <div className={`text-lg sm:text-2xl font-bold mb-1 ${activeFilter === 'all' ? 'text-yellow-200' : 'text-white'}`}>
+              {totalCount}
+            </div>
+            <div className={`text-xs sm:text-sm ${activeFilter === 'all' ? 'text-yellow-300' : 'text-gray-400'}`}>
+              Total Leaders
+            </div>
+          </button>
+          
+          <button
+            onClick={() => setActiveFilter('banned')}
+            className={`
+              backdrop-blur-sm rounded-lg border p-3 sm:p-4 text-center transition-all duration-200 relative
+              ${activeFilter === 'banned' 
+                ? 'bg-red-900/80 border-red-500 shadow-lg shadow-red-500/20' 
+                : 'bg-red-900/80 border-red-700 hover:bg-red-800/80 hover:border-red-600'
+              }
+            `}
+          >
+            {activeFilter === 'banned' && (
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-gray-900"></div>
+            )}
+            <div className={`text-lg sm:text-2xl font-bold mb-1 ${activeFilter === 'banned' ? 'text-red-200' : 'text-red-200'}`}>
+              {bannedCount}
+            </div>
+            <div className={`text-xs sm:text-sm ${activeFilter === 'banned' ? 'text-red-300' : 'text-red-300'}`}>
+              Banned
+            </div>
+          </button>
+          
+          <button
+            onClick={() => setActiveFilter('available')}
+            className={`
+              backdrop-blur-sm rounded-lg border p-3 sm:p-4 text-center transition-all duration-200 relative
+              ${activeFilter === 'available' 
+                ? 'bg-green-900/80 border-green-500 shadow-lg shadow-green-500/20' 
+                : 'bg-green-900/80 border-green-700 hover:bg-green-800/80 hover:border-green-600'
+              }
+            `}
+          >
+            {activeFilter === 'available' && (
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></div>
+            )}
+            <div className={`text-lg sm:text-2xl font-bold mb-1 ${activeFilter === 'available' ? 'text-green-200' : 'text-green-200'}`}>
+              {totalCount - bannedCount}
+            </div>
+            <div className={`text-xs sm:text-sm ${activeFilter === 'available' ? 'text-green-300' : 'text-green-300'}`}>
+              Available
+            </div>
+          </button>
         </div>
       </div>
 
       {/* Leaders Grid */}
       <div className="max-w-7xl mx-auto mb-24">
+        {/* Results count */}
+        {filteredLeaders.length > 0 && (
+          <div className="mb-4 text-center">
+            <p className="text-gray-400 text-sm">
+              Showing {filteredLeaders.length} {activeFilter === 'all' ? '' : activeFilter} leader{filteredLeaders.length !== 1 ? 's' : ''}
+              {searchQuery.trim() && ` matching "${searchQuery}"`}
+            </p>
+          </div>
+        )}
+        
         {filteredLeaders.length === 0 ? (
           <div className="text-center py-12">
             <Crown className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400 text-lg">No leaders found</p>
+            <p className="text-gray-400 text-lg">
+              {searchQuery.trim() 
+                ? `No ${activeFilter === 'all' ? '' : activeFilter} leaders found matching "${searchQuery}"`
+                : `No ${activeFilter === 'all' ? '' : activeFilter} leaders available`
+              }
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center">
@@ -288,29 +385,28 @@ export function BanStage({ userName, onBack }: BanStageProps) {
 
       {/* Footer with Instructions and Stats */}
       <div className="fixed bottom-0 left-0 right-0 bg-gray-800/95 backdrop-blur-sm border-t border-gray-700 shadow-lg">
-        <div className="max-w-7xl mx-auto p-4">
-          <div className="flex justify-between items-stretch gap-4">
+        <div className="max-w-7xl mx-auto p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row justify-between items-stretch gap-3 sm:gap-4">
             {/* Instructions */}
-            <div className="flex-1 bg-gray-900/50 px-4 py-4 rounded-lg border border-gray-700 flex flex-col justify-center">
-              <h3 className="text-white font-semibold mb-2">How to use</h3>
-              <ul className="text-sm text-gray-300 space-y-1">
+            <div className="flex-1 bg-gray-900/50 px-3 sm:px-4 py-3 sm:py-4 rounded-lg border border-gray-700 flex flex-col justify-center">
+              <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">How to use</h3>
+              <ul className="text-xs sm:text-sm text-gray-300 space-y-1">
                 <li>Click on a leader to ban them</li>
                 <li>Click on a banned leader to unban them</li>
               </ul>
             </div>
 
             {/* Attribution */}
-            <div className="flex-1 bg-gray-900/50 px-4 py-4 rounded-lg border border-gray-700 text-center flex flex-col justify-center">
-              {/* <h3 className="text-white font-semibold mb-2">About</h3> */}
-              <h3 className="text-white font-semibold mb-2">
+            <div className="flex-1 bg-gray-900/50 px-3 sm:px-4 py-3 sm:py-4 rounded-lg border border-gray-700 text-center flex flex-col justify-center">
+              <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">
                 Created by <a href="https://github.com/nickbenthem" target="_blank" rel="noopener noreferrer" className="text-yellow-500 hover:text-yellow-400 transition-colors">NickBenthem</a>
               </h3>
             </div>
 
             {/* Stats */}
-            <div className="flex-1 bg-gray-900/50 px-4 py-4 rounded-lg border border-gray-700 text-right flex flex-col justify-center">
-              <h3 className="text-white font-semibold mb-2">Leader Stats</h3>
-              <div className="text-sm text-gray-300">
+            <div className="flex-1 bg-gray-900/50 px-3 sm:px-4 py-3 sm:py-4 rounded-lg border border-gray-700 text-right flex flex-col justify-center">
+              <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">Leader Stats</h3>
+              <div className="text-xs sm:text-sm text-gray-300">
                 <div>Total Leaders: {totalCount}</div>
                 <div>Banned: {bannedCount}</div>
                 <div>Available: {totalCount - bannedCount}</div>
