@@ -1,5 +1,5 @@
-import React from 'react';
-import { Crown, Users, Ban, RefreshCw } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { Crown, Users, Ban, RefreshCw, ChevronDown, Search, X } from 'lucide-react';
 import { LeaderCard } from './LeaderCard';
 import { useLeaders } from '../hooks/useLeaders';
 import { useUserPresence } from '../hooks/useUserPresence';
@@ -9,13 +9,101 @@ interface BanStageProps {
   onBack: () => void;
 }
 
+type SortOption = 'civilization' | 'leader';
+
 export function BanStage({ userName, onBack }: BanStageProps) {
   const { leaders, loading, toggleBanLeader } = useLeaders();
   const { connectedUsers, isConnected } = useUserPresence(userName, userName);
+  const [sortBy, setSortBy] = useState<SortOption>('leader');
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Function to normalize text by removing diacritics
+  const normalizeText = (text: string): string => {
+    return text
+      .normalize('NFD') // Decompose characters into base + diacritic
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+      .toLowerCase();
+  };
+
+  // Handle clicking outside to close autocomplete
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowAutocomplete(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleToggleBan = (leaderId: string) => {
     console.log('BanStage handleToggleBan called for:', leaderId, 'by:', userName);
     toggleBanLeader(leaderId, userName);
+  };
+
+  const sortedLeaders = useMemo(() => {
+    return [...leaders].sort((a, b) => {
+      if (sortBy === 'civilization') {
+        const civA = a.civilization?.name || '';
+        const civB = b.civilization?.name || '';
+        return civA.localeCompare(civB);
+      } else {
+        return a.name.localeCompare(b.name);
+      }
+    });
+  }, [leaders, sortBy]);
+
+  const filteredLeaders = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return sortedLeaders;
+    }
+    
+    const query = normalizeText(searchQuery);
+    return sortedLeaders.filter(leader => {
+      const leaderName = normalizeText(leader.name);
+      const civName = normalizeText(leader.civilization?.name || '');
+      
+      return leaderName.includes(query) || civName.includes(query);
+    });
+  }, [sortedLeaders, searchQuery]);
+
+  const autocompleteSuggestions = useMemo(() => {
+    if (!searchQuery.trim() || searchQuery.length < 2) {
+      return [];
+    }
+    
+    const query = normalizeText(searchQuery);
+    const suggestions = leaders
+      .filter(leader => {
+        const leaderName = normalizeText(leader.name);
+        const civName = normalizeText(leader.civilization?.name || '');
+        
+        return leaderName.includes(query) || civName.includes(query);
+      })
+      .slice(0, 5) // Limit to 5 suggestions
+      .map(leader => ({
+        id: leader.id,
+        name: leader.name,
+        civilization: leader.civilization?.name || ''
+      }));
+    
+    return suggestions;
+  }, [leaders, searchQuery]);
+
+  const handleSearchSelect = (leaderName: string) => {
+    setSearchQuery(leaderName);
+    setShowAutocomplete(false);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setShowAutocomplete(false);
   };
 
   const bannedCount = leaders.filter(leader => leader.is_banned).length;
@@ -45,6 +133,89 @@ export function BanStage({ userName, onBack }: BanStageProps) {
             </div>
           </div>
           
+          {/* Sort Options */}
+          <div className="flex items-center gap-3">
+            <span className="text-white font-medium">Sort by:</span>
+            <div className="relative">
+              <button
+                onClick={() => setShowSortDropdown(!showSortDropdown)}
+                className="flex items-center gap-2 bg-gray-800/80 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-2 text-white hover:bg-gray-700/80 transition-colors"
+              >
+                <span>{sortBy === 'civilization' ? 'Civilization' : 'Leader Name'}</span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {showSortDropdown && (
+                <div className="absolute top-full left-0 mt-1 bg-gray-800/95 backdrop-blur-sm border border-gray-700 rounded-lg shadow-lg z-10 min-w-[150px]">
+                  <button
+                    onClick={() => {
+                      setSortBy('civilization');
+                      setShowSortDropdown(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 hover:bg-gray-700/80 transition-colors ${
+                      sortBy === 'civilization' ? 'text-yellow-500 bg-gray-700/50' : 'text-white'
+                    }`}
+                  >
+                    Civilization
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortBy('leader');
+                      setShowSortDropdown(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 hover:bg-gray-700/80 transition-colors ${
+                      sortBy === 'leader' ? 'text-yellow-500 bg-gray-700/50' : 'text-white'
+                    }`}
+                  >
+                    Leader Name
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative" ref={searchRef}>
+            <div className="flex items-center bg-gray-800/80 backdrop-blur-sm border border-gray-700 rounded-lg px-3 py-2">
+              <Search className="w-4 h-4 text-gray-400 mr-2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowAutocomplete(true);
+                }}
+                onFocus={() => setShowAutocomplete(true)}
+                placeholder="Search leaders..."
+                className="bg-transparent text-white placeholder-gray-400 outline-none min-w-[200px]"
+              />
+              {searchQuery && (
+                <button
+                  onClick={handleClearSearch}
+                  className="ml-2 text-gray-400 hover:text-white transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            
+            {/* Autocomplete Dropdown */}
+            {showAutocomplete && autocompleteSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-gray-800/95 backdrop-blur-sm border border-gray-700 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
+                {autocompleteSuggestions.map((suggestion) => (
+                  <button
+                    key={suggestion.id}
+                    onClick={() => handleSearchSelect(suggestion.name)}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-700/80 transition-colors border-b border-gray-700 last:border-b-0"
+                  >
+                    <div className="text-white font-medium">{suggestion.name}</div>
+                    <div className="text-sm text-gray-400">{suggestion.civilization}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700 p-3 min-w-[200px] max-w-[250px]">
             <div className="flex items-center gap-2 text-gray-300 mb-2">
               <Users className="w-5 h-5 flex-shrink-0" />
@@ -97,14 +268,14 @@ export function BanStage({ userName, onBack }: BanStageProps) {
 
       {/* Leaders Grid */}
       <div className="max-w-7xl mx-auto mb-24">
-        {leaders.length === 0 ? (
+        {filteredLeaders.length === 0 ? (
           <div className="text-center py-12">
             <Crown className="w-16 h-16 text-gray-600 mx-auto mb-4" />
             <p className="text-gray-400 text-lg">No leaders found</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center">
-            {leaders.map((leader) => (
+            {filteredLeaders.map((leader) => (
               <LeaderCard
                 key={leader.id}
                 leader={leader}
