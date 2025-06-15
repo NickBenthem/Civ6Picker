@@ -187,7 +187,10 @@ export function BanStage({ userName, onBack }: BanStageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col overflow-x-hidden" style={{ height: '100vh' }}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col overflow-x-hidden" style={{ 
+      height: '100vh',
+      paddingBottom: 'env(safe-area-inset-bottom)'
+    }}>
       {/* Main content area - scrollable */}
       <div className="flex-1 p-4 pb-20 mobile-container overflow-y-auto" ref={setScrollContainer}>
         {/* Header */}

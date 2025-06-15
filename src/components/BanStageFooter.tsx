@@ -19,7 +19,9 @@ export function BanStageFooter({
       zIndex: 10,
       // iOS Safari specific fixes
       WebkitTransform: 'translateZ(0)',
-      transform: 'translateZ(0)'
+      transform: 'translateZ(0)',
+      // Safe area inset for iPhone
+      paddingBottom: 'env(safe-area-inset-bottom)'
     }}>
       {windowWidth < 640 ? (
         // Mobile: stacked, animated, compact
