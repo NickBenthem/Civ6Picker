@@ -16,8 +16,8 @@ export function UserSetup({ onUserReady }: UserSetupProps) {
       viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
     }
     
-    // Prevent zoom on input focus
-    const preventZoom = (e: Event) => {
+    // Prevent zoom and scroll on input focus
+    const preventZoomAndScroll = (e: Event) => {
       const target = e.target as HTMLInputElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
         // Force viewport to stay at scale 1
@@ -29,31 +29,40 @@ export function UserSetup({ onUserReady }: UserSetupProps) {
         // Prevent any transform scaling
         document.body.style.transform = 'scale(1)';
         document.body.style.transformOrigin = 'top left';
+        
+        // Prevent scroll position changes
+        const currentScrollY = window.scrollY;
+        setTimeout(() => {
+          window.scrollTo(0, currentScrollY);
+        }, 0);
       }
     };
     
     // Add event listeners
-    document.addEventListener('focusin', preventZoom);
-    document.addEventListener('touchstart', preventZoom);
+    document.addEventListener('focusin', preventZoomAndScroll);
+    document.addEventListener('touchstart', preventZoomAndScroll);
     
     return () => {
-      document.removeEventListener('focusin', preventZoom);
-      document.removeEventListener('touchstart', preventZoom);
+      document.removeEventListener('focusin', preventZoomAndScroll);
+      document.removeEventListener('touchstart', preventZoomAndScroll);
     };
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (userName.trim()) {
-      // Reset viewport before transitioning to prevent zoom issues
+      // Reset viewport and scroll position before transitioning to prevent zoom issues
       window.scrollTo(0, 0);
       document.body.style.transform = 'scale(1)';
       document.body.style.transformOrigin = 'top left';
       
+      // Force a reflow to ensure the reset takes effect
+      document.body.offsetHeight;
+      
       // Small delay to ensure the reset takes effect before transition
       setTimeout(() => {
         onUserReady(userName.trim());
-      }, 50);
+      }, 100);
     }
   };
 

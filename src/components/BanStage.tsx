@@ -27,11 +27,10 @@ export function BanStage({ userName, onBack }: BanStageProps) {
 
   // Reset viewport when component mounts to fix mobile zoom issues
   useEffect(() => {
-    // Reset any zoom that might have occurred from the previous component
-    // Scroll to top to reset any scroll position
+    // Immediately reset scroll position
     window.scrollTo(0, 0);
     
-    // Reset any transform that might be applied
+    // Reset any zoom that might have occurred from the previous component
     document.body.style.transform = 'scale(1)';
     document.body.style.transformOrigin = 'top left';
     
@@ -56,10 +55,18 @@ export function BanStage({ userName, onBack }: BanStageProps) {
       document.body.style.overflowX = 'hidden';
     }
     
-    // Ensure title is visible by scrolling to top after a brief delay
+    // Multiple scroll resets to ensure it takes effect
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 50);
+    
     setTimeout(() => {
       window.scrollTo(0, 0);
     }, 100);
+    
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 200);
   }, []);
 
   // Function to normalize text by removing diacritics

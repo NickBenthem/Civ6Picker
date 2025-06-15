@@ -11,6 +11,8 @@ html, body {
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /* Prevent scroll behavior on input focus */
+  scroll-behavior: smooth;
 }
 
 /* Prevent zoom on input focus */
@@ -27,6 +29,14 @@ input, select, textarea {
   /* Ensure no transform scaling */
   transform: scale(1) !important;
   transform-origin: top left;
+  /* Prevent scroll on focus */
+  scroll-behavior: auto;
+}
+
+/* Prevent scroll behavior on input focus */
+input:focus, select:focus, textarea:focus {
+  scroll-behavior: auto;
+  -webkit-overflow-scrolling: auto;
 }
 
 /* Ensure all elements respect viewport width */
