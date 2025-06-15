@@ -45,7 +45,8 @@ export function useLeaders() {
                 ...leader,
                 is_banned: !leader.is_banned,
                 banned_by: !leader.is_banned ? userName : null,
-                banned_at: !leader.is_banned ? new Date().toISOString() : null
+                banned_at: !leader.is_banned ? new Date().toISOString() : null,
+                civilization: leader.civilization // Preserve civilization data
               }
             : leader
         ))
@@ -77,7 +78,8 @@ export function useLeaders() {
                 ...leader,
                 is_banned: currentLeader.is_banned,
                 banned_by: currentLeader.banned_by,
-                banned_at: currentLeader.banned_at
+                banned_at: currentLeader.banned_at,
+                civilization: currentLeader.civilization // Preserve civilization data
               }
             : leader
         ))
