@@ -1,174 +1,107 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  createClient,
+  REALTIME_SUBSCRIBE_STATES,
+  RealtimePresenceState,
+  SupabaseClient,
+} from '@supabase/supabase-js';
 
-const API_URL = 'https://ymllyikqdmsbldxfzmdl.supabase.co/functions/v1';
-
-export type ConnectedUser = {
+/* ------------------------------------------------------------------ */
+/* Types                                                               */
+/* ------------------------------------------------------------------ */
+export interface ConnectedUser {
   id: string;
-  user_name: string;
-  last_seen: string;
-  created_at: string;
-};
+  name: string | null;         // name may be null if a client tracked no name
+  online_at: string;
+}
 
-export function useUserPresence(userName: string) {
+/* Supabase also adds presence_ref – describe it so TS is satisfied */
+type PresencePayload = ConnectedUser & { presence_ref: string };
+
+/* ------------------------------------------------------------------ */
+/* Supabase client (singleton)                                         */
+/* ------------------------------------------------------------------ */
+const supabaseUrl  = import.meta.env.VITE_SUPABASE_URL  as string;
+const supabaseKey  = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
+
+/* ------------------------------------------------------------------ */
+/* Presence hook                                                       */
+/* ------------------------------------------------------------------ */
+export function useUserPresence(userId: string, name: string) {
   const [connectedUsers, setConnectedUsers] = useState<ConnectedUser[]>([]);
-  const [error, setError] = useState<Error | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected,   setIsConnected]   = useState(false);
+  const [error,         setError]         = useState<Error | null>(null);
 
-  // Function to update presence
-  async function updatePresence(isOnline: boolean) {
-    try {
-      console.log('Updating presence:', { userName, isOnline });
-      const response = await fetch(`${API_URL}/user-presence`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          userName,
-          isOnline
-        })
-      });
+  /* One channel per tab — keep in a ref so it survives re-renders */
+  const channelRef     = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const subscribedRef  = useRef(false); // guard against double subscribe
 
-      if (!response.ok) {
-        throw new Error('Failed to update presence');
-      }
-
-      const { data } = await response.json();
-      console.log('Presence update response:', data);
-      setConnectedUsers(data);
-    } catch (e) {
-      console.error('Error updating presence:', e);
-      setError(e instanceof Error ? e : new Error('Failed to update presence'));
-    }
-  }
+  /* Key must be unique per tab (Supabase Presence requirement) */
+  const presenceKey = useMemo(
+    () => `${userId}_${crypto.randomUUID()}`,
+    [userId],
+  );
 
   useEffect(() => {
-    let ws: WebSocket | null = null;
-    let reconnectTimeout: NodeJS.Timeout;
-    let pingInterval: NodeJS.Timeout;
-    let isComponentMounted = true;
-    let isInitialSetup = true;
+    /* Lazily create the channel only once */
+    if (!channelRef.current) {
+      channelRef.current = supabase.channel('user-presence', {
+        config: { presence: { key: presenceKey } },
+      });
+    }
+    const channel = channelRef.current;
 
-    // Handle page unload
-    const handleBeforeUnload = () => {
-      // Use sendBeacon for more reliable delivery during page unload
-      const data = new Blob(
-        [JSON.stringify({ userName, isOnline: false })],
-        { type: 'application/json' }
-      );
-      navigator.sendBeacon(`${API_URL}/user-presence`, data);
+    /* Bail out if we already subscribed (Strict Mode double invoke) */
+    if (subscribedRef.current) return;
+    subscribedRef.current = true;
+
+    /* Handler for full state syncs */
+    const syncHandler = () => {
+      const state: RealtimePresenceState<PresencePayload> =
+        channel.presenceState<PresencePayload>();
+
+      const everyone: ConnectedUser[] = Object.values(state)
+        .flat()
+        .map(({ presence_ref, ...rest }) => rest);
+
+      setConnectedUsers(everyone);
     };
 
-    // Add beforeunload event listener
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    async function setupPresence() {
-      if (!isComponentMounted) return;
-
-      try {
-        // Only make initial presence update if this is the first setup
-        if (isInitialSetup) {
-          await updatePresence(true);
-          isInitialSetup = false;
+    channel
+      .on('presence', { event: 'sync' }, syncHandler)
+      .on('presence', { event: 'join'  }, ({ key }) => console.log(`${key} joined`))
+      .on('presence', { event: 'leave' }, ({ key }) => console.log(`${key} left`))
+      .subscribe(async (status, err) => {
+        if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
+          setIsConnected(true);
+          try {
+            await channel.track({
+              id: userId,
+              name,
+              online_at: new Date().toISOString(),
+            });
+          } catch (trackErr) {
+            setError(trackErr as Error);
+          }
         }
 
-        // Setup WebSocket connection
-        const wsUrl = API_URL.replace('https://', 'wss://') + '/user-presence';
-        ws = new WebSocket(wsUrl);
-
-        ws.onopen = () => {
-          if (!isComponentMounted) {
-            ws?.close();
-            return;
-          }
-          console.log('WebSocket connection established');
-          setIsConnected(true);
-          setError(null);
-
-          // Setup ping interval to keep connection alive
-          pingInterval = setInterval(() => {
-            if (ws?.readyState === WebSocket.OPEN) {
-              ws.send(JSON.stringify({ type: 'ping' }));
-            }
-          }, 30000); // Send ping every 30 seconds
-        };
-
-        ws.onmessage = (event) => {
-          if (!isComponentMounted) return;
-          try {
-            const message = JSON.parse(event.data);
-            console.log('Received WebSocket message:', message);
-
-            if (message.type === 'presence-updated') {
-              console.log('Updating connected users:', message.data);
-              setConnectedUsers(message.data);
-            } else if (message.type === 'pong') {
-              console.log('Received pong');
-            }
-          } catch (e) {
-            console.error('Error parsing WebSocket message:', e);
-          }
-        };
-
-        ws.onerror = (error) => {
-          if (!isComponentMounted) return;
-          console.error('WebSocket error:', error);
-          setError(new Error('Failed to maintain presence connection'));
+        if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
+          console.error(err);
+          setError(err ?? new Error('Channel error'));
           setIsConnected(false);
-        };
+        }
+      });
 
-        ws.onclose = () => {
-          if (!isComponentMounted) return;
-          console.log('WebSocket connection closed');
-          setIsConnected(false);
-          clearInterval(pingInterval);
-
-          // Attempt to reconnect after a delay
-          reconnectTimeout = setTimeout(() => {
-            setupPresence();
-          }, 3000);
-        };
-
-      } catch (e) {
-        if (!isComponentMounted) return;
-        console.error('Setup presence failed:', e);
-        setError(e instanceof Error ? e : new Error('Failed to setup presence'));
-        setIsConnected(false);
-        
-        // Attempt to reconnect after a delay
-        reconnectTimeout = setTimeout(() => {
-          setupPresence();
-        }, 3000);
-      }
-    }
-
-    setupPresence();
-
-    // Cleanup function
+    /* Cleanup on unmount */
     return () => {
-      isComponentMounted = false;
-      
-      // Remove beforeunload event listener
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      
-      // Close WebSocket connection
-      if (ws) {
-        ws.close();
-        ws = null;
+      if (channelRef.current) {
+        channelRef.current.unsubscribe();
+        channelRef.current = null;
       }
-
-      // Clear intervals and timeouts
-      if (reconnectTimeout) {
-        clearTimeout(reconnectTimeout);
-      }
-      if (pingInterval) {
-        clearInterval(pingInterval);
-      }
-
-      // Update presence to offline
-      updatePresence(false).catch(console.error);
+      subscribedRef.current = false;
     };
-  }, [userName]);
+  }, [userId, name, presenceKey]);
 
-  return { connectedUsers, error, isConnected };
-} 
+  return { connectedUsers, isConnected, error };
+}

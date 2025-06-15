@@ -11,7 +11,7 @@ interface BanStageProps {
 
 export function BanStage({ userName, onBack }: BanStageProps) {
   const { leaders, loading, toggleBanLeader } = useLeaders();
-  const { connectedUsers, isConnected } = useUserPresence(userName);
+  const { connectedUsers, isConnected } = useUserPresence(userName, userName);
 
   const handleToggleBan = (leaderId: string) => {
     console.log('BanStage handleToggleBan called for:', leaderId, 'by:', userName);
@@ -50,14 +50,29 @@ export function BanStage({ userName, onBack }: BanStageProps) {
               <div className="flex items-center gap-2 text-gray-300 mb-2">
                 <Users className="w-5 h-5 flex-shrink-0" />
                 <span className="font-medium">{connectedUsers.length} Online</span>
-                <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'} ml-auto`} />
+                <div className="flex items-center gap-1 ml-auto">
+                  <div 
+                    className={`w-2 h-2 rounded-full ${
+                      isConnected 
+                        ? 'bg-green-500 animate-pulse' 
+                        : 'bg-red-500'
+                    }`} 
+                  />
+                  <span className="text-xs text-gray-400">
+                    {isConnected ? 'Connected' : 'Disconnected'}
+                  </span>
+                </div>
               </div>
               <div className="space-y-1 max-h-[120px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
-                {connectedUsers.map(user => (
-                  <div key={user.id} className="text-sm text-gray-400 truncate">
-                    {user.user_name}
-                  </div>
-                ))}
+              {connectedUsers.map((u) => (
+                <div
+                  key={u.id}
+                  className="text-sm text-gray-400 truncate"
+                  title={u.name ?? undefined}
+                >
+                  {u.name ?? 'Unknown'}
+                </div>
+              ))}
               </div>
             </div>
             <button
