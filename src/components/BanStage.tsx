@@ -45,25 +45,24 @@ export function BanStage({ userName, onBack }: BanStageProps) {
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
-            <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700 p-3 min-w-[200px] max-w-[250px]">
-              <div className="flex items-center gap-2 text-gray-300 mb-2">
-                <Users className="w-5 h-5 flex-shrink-0" />
-                <span className="font-medium">{connectedUsers.length} Online</span>
-                <div className="flex items-center gap-1 ml-auto">
-                  <div 
-                    className={`w-2 h-2 rounded-full ${
-                      isConnected 
-                        ? 'bg-green-500 animate-pulse' 
-                        : 'bg-red-500'
-                    }`} 
-                  />
-                  <span className="text-xs text-gray-400">
-                    {isConnected ? 'Connected' : 'Disconnected'}
-                  </span>
-                </div>
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700 p-3 min-w-[200px] max-w-[250px]">
+            <div className="flex items-center gap-2 text-gray-300 mb-2">
+              <Users className="w-5 h-5 flex-shrink-0" />
+              <span className="font-medium">{connectedUsers.length} Online</span>
+              <div className="flex items-center gap-1 ml-auto">
+                <div 
+                  className={`w-2 h-2 rounded-full ${
+                    isConnected 
+                      ? 'bg-green-500 animate-pulse' 
+                      : 'bg-red-500'
+                  }`} 
+                />
+                <span className="text-xs text-gray-400">
+                  {isConnected ? 'Connected' : 'Disconnected'}
+                </span>
               </div>
-              <div className="space-y-1 max-h-[120px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
+            </div>
+            <div className="space-y-1 max-h-[120px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
               {connectedUsers.map((u) => (
                 <div
                   key={u.id}
@@ -73,14 +72,7 @@ export function BanStage({ userName, onBack }: BanStageProps) {
                   {u.name ?? 'Unknown'}
                 </div>
               ))}
-              </div>
             </div>
-            <button
-              onClick={onBack}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-            >
-              Leave Session
-            </button>
           </div>
         </div>
       </div>
@@ -111,7 +103,7 @@ export function BanStage({ userName, onBack }: BanStageProps) {
             <p className="text-gray-400 text-lg">No leaders found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center">
             {leaders.map((leader) => (
               <LeaderCard
                 key={leader.id}
