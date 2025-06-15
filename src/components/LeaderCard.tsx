@@ -30,7 +30,7 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
   return (
     <div
       className={`
-        w-full max-w-[300px] h-[600px] sm:h-[700px] lg:h-[800px]    /* responsive height */
+        w-full max-w-[280px] sm:max-w-[300px] h-[600px] sm:h-[700px] lg:h-[800px]    /* responsive height and width */
         relative group transition-all duration-300
         transform hover:scale-105
         ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}

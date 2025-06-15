@@ -35,6 +35,10 @@ export function BanStage({ userName, onBack }: BanStageProps) {
     document.body.style.transform = 'scale(1)';
     document.body.style.transformOrigin = 'top left';
     
+    // Ensure no horizontal scroll
+    document.body.style.overflowX = 'hidden';
+    document.documentElement.style.overflowX = 'hidden';
+    
     // Ensure the viewport meta tag is properly applied
     const viewport = document.querySelector('meta[name="viewport"]');
     if (viewport) {
@@ -43,6 +47,14 @@ export function BanStage({ userName, onBack }: BanStageProps) {
     
     // Force a reflow to ensure the viewport is properly reset
     document.body.offsetHeight;
+    
+    // Additional mobile-specific fixes
+    if (window.innerWidth <= 768) {
+      // On mobile, ensure the body doesn't exceed viewport width
+      document.body.style.width = '100vw';
+      document.body.style.maxWidth = '100vw';
+      document.body.style.overflowX = 'hidden';
+    }
   }, []);
 
   // Function to normalize text by removing diacritics
@@ -406,7 +418,7 @@ export function BanStage({ userName, onBack }: BanStageProps) {
       </div>
 
       {/* Leaders Grid */}
-      <div className="max-w-7xl mx-auto mb-24">
+      <div className="max-w-7xl mx-auto mb-24 grid-container">
         {/* Results count */}
         {filteredLeaders.length > 0 && (
           <div className="mb-4 text-center">
@@ -428,7 +440,7 @@ export function BanStage({ userName, onBack }: BanStageProps) {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center w-full max-w-full overflow-x-hidden">
             {filteredLeaders.map((leader) => (
               <LeaderCard
                 key={leader.id}
