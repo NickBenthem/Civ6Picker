@@ -44,10 +44,22 @@ export function useUserPresence(userId: string, name: string) {
   );
 
   useEffect(() => {
+    const handleUnload = () => {
+      if (!channel) return;
+      /* Tell the server we’re gone NOW */
+      channel.untrack();        // sends Presence LEAVE
+      channel.unsubscribe();    // closes socket if idle
+      supabase.removeChannel(channel);
+    };
+    
+    window.addEventListener('pagehide', handleUnload); // pagehide works with bfcache
+    
     /* Lazily create the channel only once */
     if (!channelRef.current) {
       channelRef.current = supabase.channel('user-presence', {
         config: { presence: { key: presenceKey } },
+      // @ts-expect-error: `timeout` not yet in the public typings
+      timeout: 6000,          // ms
       });
     }
     const channel = channelRef.current;
