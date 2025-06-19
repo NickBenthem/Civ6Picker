@@ -12,7 +12,7 @@ interface BanStageProps {
   onBack: () => void;
 }
 
-type SortOption = 'civilization' | 'leader';
+type SortOption = 'civilization' | 'leader' | 'lastUpdated';
 type FilterOption = 'all' | 'banned' | 'available';
 
 export function BanStage({ userName, onBack }: BanStageProps) {
@@ -98,6 +98,12 @@ export function BanStage({ userName, onBack }: BanStageProps) {
         const civA = a.civilization?.name || '';
         const civB = b.civilization?.name || '';
         return civA.localeCompare(civB);
+      } else if (sortBy === 'lastUpdated') {
+        // Sort by banned_at timestamp (most recent first)
+        // If banned_at is null, use created_at as fallback
+        const timeA = a.banned_at ? new Date(a.banned_at).getTime() : new Date(a.created_at).getTime();
+        const timeB = b.banned_at ? new Date(b.banned_at).getTime() : new Date(b.created_at).getTime();
+        return timeB - timeA; // Descending order (most recent first)
       } else {
         return a.name.localeCompare(b.name);
       }

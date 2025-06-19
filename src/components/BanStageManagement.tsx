@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { ChevronDown, Search, X } from 'lucide-react';
 
-type SortOption = 'civilization' | 'leader';
+type SortOption = 'civilization' | 'leader' | 'lastUpdated';
 type FilterOption = 'all' | 'banned' | 'available';
 
 interface BanStageManagementProps {
@@ -70,7 +70,7 @@ export function BanStageManagement({
                 onClick={() => setShowSortDropdown(!showSortDropdown)}
                 className="flex items-center gap-2 bg-gray-800/80 backdrop-blur-sm border border-gray-700 rounded-lg px-3 py-2 text-sm sm:text-base text-white hover:bg-gray-700/80 transition-colors min-w-0"
               >
-                <span className="truncate">{sortBy === 'civilization' ? 'Civilization' : 'Leader'}</span>
+                <span className="truncate">{sortBy === 'civilization' ? 'Civilization' : sortBy === 'leader' ? 'Leader' : 'Last Updated'}</span>
                 <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
               </button>
               
@@ -97,6 +97,17 @@ export function BanStageManagement({
                     }`}
                   >
                     Leader
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortBy('lastUpdated');
+                      setShowSortDropdown(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 hover:bg-gray-700/80 transition-colors ${
+                      sortBy === 'lastUpdated' ? 'text-yellow-500 bg-gray-700/50' : 'text-white'
+                    }`}
+                  >
+                    Last Updated
                   </button>
                 </div>
               )}

@@ -6,15 +6,6 @@ const supabaseUrl  = import.meta.env.NEXT_PUBLIC_SUPABASE_URL  as string;
 
 const API_URL = `${supabaseUrl}/functions/v1`;
 
-function sortLeaders(leaders: Leader[]): Leader[] {
-  return [...leaders].sort((a, b) => {
-    // First sort by civilization name
-    const leaderA = a.name || '';
-    const leaderB = b.name || '';
-    return leaderA.localeCompare(leaderB);
-  });
-}
-
 export function useLeaders() {
   const [leaders, setLeaders] = useState<Leader[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +33,7 @@ export function useLeaders() {
   async function fetchLeadersData() {
     try {
       const data = await fetchLeaders();
-      setLeaders(sortLeaders(data));
+      setLeaders(data);
     } catch (e) {
       setError(e instanceof Error ? e : new Error('Failed to fetch leaders'));
     } finally {
@@ -57,7 +48,7 @@ export function useLeaders() {
     try {
       // Update the local state immediately for better UX
       setLeaders(prevLeaders => 
-        sortLeaders(prevLeaders.map(leader => 
+        prevLeaders.map(leader => 
           leader.id === leaderId 
             ? {
                 ...leader,
@@ -66,7 +57,7 @@ export function useLeaders() {
                 banned_at: !leader.is_banned ? new Date().toISOString() : null
               }
             : leader
-        ))
+        )
       );
 
       // Call the broadcast-leader-state endpoint
@@ -89,7 +80,7 @@ export function useLeaders() {
       setError(e instanceof Error ? e : new Error('Failed to toggle ban'));
       // Revert the local state change on error
       setLeaders(prevLeaders => 
-        sortLeaders(prevLeaders.map(leader => 
+        prevLeaders.map(leader => 
           leader.id === leaderId 
             ? {
                 ...leader,
@@ -98,7 +89,7 @@ export function useLeaders() {
                 banned_at: currentLeader.banned_at
               }
             : leader
-        ))
+        )
       );
     }
   }
@@ -113,23 +104,23 @@ export function useLeaders() {
     // Create new EventSource connection
     eventSourceRef.current = new EventSource(`${API_URL}/broadcast-leader-state`);
 
-    eventSourceRef.current.addEventListener('leader-updated', (event) => {
+    eventSourceRef.current?.addEventListener('leader-updated', (event) => {
       const updatedLeader = JSON.parse(event.data);
       setLeaders(prevLeaders => 
-        sortLeaders(prevLeaders.map(leader => 
+        prevLeaders.map(leader => 
           leader.id === updatedLeader.id ? updatedLeader : leader
-        ))
+        )
       );
     });
 
-    eventSourceRef.current.addEventListener('open', () => {
+    eventSourceRef.current?.addEventListener('open', () => {
       console.log('EventSource connection opened');
       setIsReconnecting(false);
       setError(null);
       reconnectionManagerRef.current.reset(); // Reset retry counter on successful connection
     });
 
-    eventSourceRef.current.addEventListener('error', (error) => {
+    eventSourceRef.current?.addEventListener('error', (error) => {
       console.error('EventSource failed:', error);
       setIsReconnecting(true);
       
