@@ -192,13 +192,8 @@ export function BanStage({ userName, onBack }: BanStageProps) {
     }}>
       {/* Main content area - scrollable */}
       <div 
-        className="flex-1 p-4 overflow-y-auto" 
+        className="flex-1 p-4 overflow-y-auto pb-10 md:pb-4" 
         ref={setScrollContainer}
-        style={{
-          // Add bottom padding to account for fixed footer
-          // Use CSS custom property for dynamic footer height
-          paddingBottom: '10px'
-        }}
       >
         {/* Header */}
         <BanStageHeader

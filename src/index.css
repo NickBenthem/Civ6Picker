@@ -28,10 +28,6 @@ html, body {
 /* Body padding to prevent content hiding behind footer */
 body {
   margin: 0;
-  /* Use CSS custom property for dynamic footer height with better iPhone support */
-  padding-bottom: calc(var(--footer-h, 0px) + env(safe-area-inset-bottom, 0px));
-  /* Fallback for iOS 11 */
-  padding-bottom: calc(var(--footer-h, 0px) + constant(safe-area-inset-bottom, 0px));
   /* Prevent rubber band scrolling on iOS */
   overscroll-behavior: none;
   /* Ensure proper height calculation */
@@ -192,7 +188,7 @@ input:focus, select:focus, textarea:focus {
   background: #6b7280;
 }
 
-/* iPhone specific fixes */
+/* iPhone/mobile specific fixes */
 @media screen and (max-width: 767px) {
   /* Ensure footer is always visible on iPhone */
   .footer {
