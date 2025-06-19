@@ -37,14 +37,14 @@ export function BanStageFooter({
             )}
             {/* Stats - Always visible, becomes more prominent when scrolled */}
             <div 
-              className="bg-gray-900/70 border border-gray-700 flex items-center justify-center text-center transition-all duration-300 ease-out"
+              className="w-full bg-gray-900/70 border border-gray-700 rounded-lg flex items-center justify-center text-center transition-all duration-300 ease-out"
               style={{
                 padding: isScrolled ? '8px 12px' : '4px 8px',
                 borderRadius: isScrolled ? '8px' : '6px',
                 transform: isScrolled ? 'scale(1.05)' : 'scale(1)'
               }}
             >
-              <span className="font-semibold text-sm text-white mr-2">Stats:</span>
+              <span className="font-semibold text-sm text-white mr-2">Stats</span>
               <span className="text-xs text-gray-300 mr-2">Total: {totalCount}</span>
               <span className="text-xs text-gray-300 mr-2">Banned: {bannedCount}</span>
               <span className="text-xs text-gray-300">Available: {totalCount - bannedCount}</span>
@@ -54,19 +54,19 @@ export function BanStageFooter({
       ) : (
         // Desktop: single horizontal bar with three sections
         <div className="max-w-7xl mx-auto p-2 sm:p-3">
-          <div className="flex flex-row items-center w-full gap-4">
+          <div className="flex flex-row items-stretch w-full gap-4">
             {/* Instructions */}
-            <div className="flex-1 bg-gray-900/70 border border-gray-700 rounded-lg px-4 py-2 flex items-center justify-center text-center">
+            <div className="flex-1 bg-gray-900/70 border border-gray-700 rounded-lg px-4 py-2 flex items-center justify-center text-center min-h-[48px]">
               <span className="font-semibold text-base text-white mr-2">How to use:</span>
               <span className="text-sm text-gray-300">Click to ban/unban leaders</span>
             </div>
             {/* Attribution */}
-            <div className="flex-1 bg-gray-900/70 border border-gray-700 rounded-lg px-4 py-2 flex items-center justify-center text-center">
+            <div className="flex-1 bg-gray-900/70 border border-gray-700 rounded-lg px-4 py-2 flex items-center justify-center text-center min-h-[48px]">
               <span className="font-semibold text-base text-white">Created by <a href="https://github.com/nickbenthem" target="_blank" rel="noopener noreferrer" className="text-yellow-500 hover:text-yellow-400 transition-colors font-bold">NickBenthem</a></span>
             </div>
             {/* Stats */}
-            <div className="flex-1 bg-gray-900/70 border border-gray-700 rounded-lg px-4 py-2 flex items-center justify-center text-center">
-              <span className="font-semibold text-base text-white mr-3">Stats:</span>
+            <div className="flex-1 bg-gray-900/70 border border-gray-700 rounded-lg px-4 py-2 flex items-center justify-center text-center min-h-[48px]">
+              <span className="font-semibold text-base text-white mr-3">Stats</span>
               <span className="text-sm text-gray-300 mr-3">Total: {totalCount}</span>
               <span className="text-sm text-gray-300 mr-3">Banned: {bannedCount}</span>
               <span className="text-sm text-gray-300">Available: {totalCount - bannedCount}</span>
