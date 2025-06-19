@@ -23,6 +23,11 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
   .map((s) => s.trim())
   .filter(Boolean);          // remove empty strings
 
+  const civilizationBonusText =
+  (leader.civilization?.civilization_bonus || '')
+  .split('.')
+  .map((s) => s.trim())
+  .filter(Boolean);          // remove empty strings
 
   const uniqueUnit = leader.civilization?.unique_units?.[0];
   const uniqueInfra = leader.civilization?.unique_infrastructure?.[0];
@@ -167,15 +172,15 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
         <div className="flex-grow flex flex-col">
           {/* 4. Civilization Bonus */}
           {leader.civilization?.civilization_bonus && (
-            <div className="p-3 sm:p-4 text-xs sm:text-sm text-gray-300 bg-gray-900/50 overflow-hidden text-left max-h-[50%]">
+            <div className="p-3 sm:p-4 text-sm sm:text-base text-gray-300 bg-gray-900/50 overflow-hidden text-left flex-grow">
               <div className="font-semibold text-yellow-400 mb-2">Civilization Bonus:</div>
-              {leader.civilization.civilization_bonus
-                .split('.')
-                .map((s: string) => s.trim())
-                .filter(Boolean)
-                .map((sentence: string, i: number) => (
-                  <li key={i} className="list-none">{sentence}.</li>
-                ))}
+              <div className="relative h-full overflow-hidden">
+                <div className="group-hover:animate-scroll-text absolute w-full pb-4">
+                  {civilizationBonusText.map((sentence, i) => (
+                    <li key={i} className="list-none mb-1">{sentence}.</li>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 

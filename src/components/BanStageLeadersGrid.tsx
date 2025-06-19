@@ -19,10 +19,10 @@ export function BanStageLeadersGrid({
   onToggleBan
 }: BanStageLeadersGridProps) {
   return (
-    <div className="max-w-7xl mx-auto mb-4 sm:mb-6 px-4 sm:px-6 grid-container">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 sm:py-3 grid-container">
       {/* Results count */}
       {filteredLeaders.length > 0 && (
-        <div className="mb-4 text-center">
+        <div className="mb-1 text-center">
           <p className="text-gray-400 text-sm">
             Showing {filteredLeaders.length} {activeFilter === 'all' ? '' : activeFilter} leader{filteredLeaders.length !== 1 ? 's' : ''}
             {searchQuery.trim() && ` matching "${searchQuery}"`}
@@ -41,7 +41,7 @@ export function BanStageLeadersGrid({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 place-items-center overflow-x-hidden p-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 place-items-center overflow-visible p-4">
           {filteredLeaders.map((leader) => (
             <LeaderCard
               key={leader.id}

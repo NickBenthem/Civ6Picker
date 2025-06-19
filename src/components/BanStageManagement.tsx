@@ -60,7 +60,7 @@ export function BanStageManagement({
   return (
     <>
       {/* Controls Section - More compact and horizontal */}
-      <div className="max-w-7xl mx-auto mb-4 sm:mb-6">
+      <div className="max-w-7xl mx-auto my-1 sm:my-2">
         <div className="flex flex-row items-center gap-2 sm:gap-3 min-w-0">
           {/* Sort Options */}
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
@@ -165,7 +165,7 @@ export function BanStageManagement({
       </div>
 
       {/* Filter Buttons */}
-      <div className="max-w-7xl mx-auto mb-4 sm:mb-6">
+      <div className="max-w-7xl mx-auto mt-1 sm:mt-2">
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <button
             onClick={() => setActiveFilter('all')}

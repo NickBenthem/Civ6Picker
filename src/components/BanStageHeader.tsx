@@ -78,7 +78,7 @@ export function BanStageHeader({
 
   return (
     <>
-      <div className="max-w-7xl mx-auto mb-4 sm:mb-6">
+      <div className="max-w-7xl mx-auto my-1 sm:my-2">
         {/* Title and User Info */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-3 sm:mb-4">
           <div className="flex items-center gap-3 min-w-0 flex-1">
