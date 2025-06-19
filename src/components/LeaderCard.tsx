@@ -185,7 +185,7 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
           )}
 
           {/* 5. Ability description */}
-          <div className="p-3 sm:p-4 flex-grow text-xs sm:text-sm text-gray-300 bg-gray-900/50 text-left">
+          <div className="p-3 sm:p-4 flex-grow text-xs sm:text-sm text-gray-300 bg-gray-900/50 text-left overflow-hidden">
             <div className="font-semibold text-yellow-400 mb-2">Leader Ability:</div>
             <div className="relative h-full overflow-hidden">
               <div className="group-hover:animate-scroll-text absolute w-full pb-4">
