@@ -333,7 +333,7 @@
     "unit_keys": "Oromo_Cavalry__Civ6_.png",
     "unique_infrastructure": "Rock-Hewn Church",
     "infra_keys": "Rock-Hewn_Church__Civ6_.png",
-    "civilization_bonus": "Improved resource tiles receive +1  Faith for each copy of the resource the city owns. International  Trade Routes grant +0.5  Faith for each resource in the origin city. Can purchase Archaeologists and Archaeological Museums with Faith."
+    "civilization_bonus": "Improved resource tiles receive +1  Faith for each copy of the resource the city owns. International  Trade Routes grant +5  Faith for each resource in the origin city. Can purchase Archaeologists and Archaeological Museums with Faith."
   },
   {
     "civilization": "French",
@@ -381,7 +381,7 @@
     "unit_keys": "Gaesatae__Civ6_.png",
     "unique_infrastructure": "Oppidum",
     "infra_keys": "Industrial_Zone__Civ6_.png",
-    "civilization_bonus": "Mines gain +1  Culture, provide a +0.5 adjacency bonus for all districts and trigger a Culture Bomb when built, claiming surrounding unowned tiles. Specialty districts do not receive an adjacency bonus from other districts and cannot be built next to the City Center."
+    "civilization_bonus": "Mines gain +1  Culture, provide a +5 adjacency bonus for all districts and trigger a Culture Bomb when built, claiming surrounding unowned tiles. Specialty districts do not receive an adjacency bonus from other districts and cannot be built next to the City Center."
   },
   {
     "civilization": "Georgian",
@@ -513,7 +513,7 @@
     "unit_keys": "Jong__Civ6_.png",
     "unique_infrastructure": "Kampung",
     "infra_keys": "Kampung__Civ6_.png",
-    "civilization_bonus": "Coast and Lake tiles provide a +0.5 adjacency bonus for Holy Site, Campus, Industrial Zone, and Theater Square districts. Entertainment Complexes built adjacent to a Coast or Lake tile provide +1  Amenity."
+    "civilization_bonus": "Coast and Lake tiles provide a +5 adjacency bonus for Holy Site, Campus, Industrial Zone, and Theater Square districts. Entertainment Complexes built adjacent to a Coast or Lake tile provide +1  Amenity."
   },
   {
     "civilization": "Japanese",
@@ -525,7 +525,7 @@
     "unit_keys": "Samurai__Civ6_.png",
     "unique_infrastructure": "Electronics Factory",
     "infra_keys": "Electronics_Factory__Civ6_.png",
-    "civilization_bonus": "Districts receive a +1 adjacency bonus for each adjacent district, instead of +0.5."
+    "civilization_bonus": "Districts receive a +1 adjacency bonus for each adjacent district, instead of +5."
   },
   {
     "civilization": "Japanese",
@@ -537,7 +537,7 @@
     "unit_keys": "Samurai__Civ6_.png",
     "unique_infrastructure": "Electronics Factory",
     "infra_keys": "Electronics_Factory__Civ6_.png",
-    "civilization_bonus": "Districts receive a +1 adjacency bonus for each adjacent district, instead of +0.5."
+    "civilization_bonus": "Districts receive a +1 adjacency bonus for each adjacent district, instead of +5."
   },
   {
     "civilization": "Khmer",
@@ -796,7 +796,7 @@
     "civilization_key": "Polish__Civ6_.png",
     "leader": "Jadwiga",
     "leader_key": "Jadwiga__Civ6_.png",
-    "ability": "Taking territory from a foreign city with a Culture Bomb converts it to Poland's religion.  Relics grant +4  Gold, +2  Culture and +2  Faith. Holy Sites receive a +1 adjacency bonus from districts, instead of +0.5.",
+    "ability": "Taking territory from a foreign city with a Culture Bomb converts it to Poland's religion.  Relics grant +4  Gold, +2  Culture and +2  Faith. Holy Sites receive a +1 adjacency bonus from districts, instead of +5.",
     "unique_units": "Winged Hussar",
     "unit_keys": "Winged_Hussar__Civ6_.png",
     "unique_infrastructure": "Sukiennice",
