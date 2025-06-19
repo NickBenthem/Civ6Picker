@@ -19,7 +19,7 @@ export function BanStageLeadersGrid({
   onToggleBan
 }: BanStageLeadersGridProps) {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 sm:py-3 grid-container">
+    <div className="max-w-7xl mx-auto py-2 sm:py-3 grid-container overflow-visible">
       {/* Results count */}
       {filteredLeaders.length > 0 && (
         <div className="mb-1 text-center">
@@ -41,7 +41,7 @@ export function BanStageLeadersGrid({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 place-items-center overflow-visible p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 overflow-visible">
           {filteredLeaders.map((leader) => (
             <LeaderCard
               key={leader.id}
