@@ -23,6 +23,25 @@ html, body {
   min-height: 100vh;
 }
 
+/* 1 – make room for the footer so page content never hides behind it */
+body {
+  margin: 0;
+  /* footer is 56 px tall → add the same space + any safe-area (home-indicator) */
+  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0));
+}
+
+/* 2 – the sticky footer itself */
+.footer {
+  position: sticky; 
+  left: 0;
+  right: 0;
+  bottom: env(safe-area-inset-bottom, 0);
+  height: 56px;             /* your footer height */
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  z-index: 9999;            /* keep it on top of page content */
+  background: #fff;         /* example styling */
+}
+
 /* Main content container - 90% viewport width */
 #root {
   width: 100%;
