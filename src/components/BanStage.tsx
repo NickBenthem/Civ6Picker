@@ -196,8 +196,8 @@ export function BanStage({ userName, onBack }: BanStageProps) {
         ref={setScrollContainer}
         style={{
           // Add bottom padding to account for fixed footer
-          // Use a larger value to ensure content is visible above the footer
-          paddingBottom: '140px'
+          // Use CSS custom property for dynamic footer height
+          paddingBottom: '10px'
         }}
       >
         {/* Header */}

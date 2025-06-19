@@ -14,7 +14,10 @@
       parseFloat(computedStyle.marginTop) + 
       parseFloat(computedStyle.marginBottom);
     
-    document.documentElement.style.setProperty('--footer-h', `${totalHeight}px`);
+    // Use the actual height, with no minimum
+    const finalHeight = totalHeight;
+    
+    document.documentElement.style.setProperty('--footer-h', `${finalHeight}px`);
   }
   
   // ResizeObserver for dynamic content changes

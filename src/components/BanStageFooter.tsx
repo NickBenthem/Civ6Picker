@@ -16,15 +16,6 @@ export function BanStageFooter({
   return (
     <div 
       className="footer bg-gray-800/95 backdrop-blur-sm border-t border-gray-700 shadow-lg" 
-      style={{ 
-        // iOS Safari specific fixes
-        WebkitTransform: 'translateZ(0)',
-        transform: 'translateZ(0)',
-        // Safe area insets for iPhone - use calc to ensure proper positioning
-        paddingTop: '8px',
-        // Ensure the footer is above browser UI
-        WebkitOverflowScrolling: 'touch'
-      }}
     >
       {windowWidth < 640 ? (
         // Mobile: stacked, animated, compact
