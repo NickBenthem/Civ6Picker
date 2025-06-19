@@ -208,6 +208,8 @@ export function BanStage({ userName, onBack }: BanStageProps) {
           isConnected={isConnected}
           isReconnecting={isReconnecting}
           isLeaderReconnecting={isLeaderReconnecting}
+          onSignOut={onBack}
+          onChangeName={onBack}
         />
 
         {/* Management Controls */}
