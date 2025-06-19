@@ -197,7 +197,7 @@ export function BanStage({ userName, onBack }: BanStageProps) {
         style={{
           // Add bottom padding to account for fixed footer
           // Use a larger value to ensure content is visible above the footer
-          paddingBottom: 'calc(env(safe-area-inset-bottom) + 140px)'
+          paddingBottom: '140px'
         }}
       >
         {/* Header */}

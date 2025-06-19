@@ -163,28 +163,31 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
           )}
         </div>
 
-        {/* 4. Civilization Bonus */}
-        {leader.civilization?.civilization_bonus && (
-          <div className="p-3 sm:p-4 text-xs sm:text-sm text-gray-300 bg-gray-900/50 overflow-hidden text-left">
-            <div className="font-semibold text-yellow-400 mb-2">Civilization Bonus:</div>
-            {leader.civilization.civilization_bonus
-              .split('.')
-              .map((s: string) => s.trim())
-              .filter(Boolean)
-              .map((sentence: string, i: number) => (
-                <li key={i} className="list-none">{sentence}.</li>
-              ))}
-          </div>
-        )}
+        {/* 4. Civilization Bonus and 5. Ability description combined container */}
+        <div className="flex-grow flex flex-col">
+          {/* 4. Civilization Bonus */}
+          {leader.civilization?.civilization_bonus && (
+            <div className="p-3 sm:p-4 text-xs sm:text-sm text-gray-300 bg-gray-900/50 overflow-hidden text-left max-h-[50%]">
+              <div className="font-semibold text-yellow-400 mb-2">Civilization Bonus:</div>
+              {leader.civilization.civilization_bonus
+                .split('.')
+                .map((s: string) => s.trim())
+                .filter(Boolean)
+                .map((sentence: string, i: number) => (
+                  <li key={i} className="list-none">{sentence}.</li>
+                ))}
+            </div>
+          )}
 
-        {/* 5. Ability description (flex-grow keeps cards equal height) */}
-        <div className="p-3 sm:p-4 flex-grow text-xs sm:text-sm text-gray-300 bg-gray-900/50 overflow-hidden text-left">
-          <div className="font-semibold text-yellow-400 mb-2">Leader Ability:</div>
-          <div className="relative h-[80px] sm:h-[100px] lg:h-[120px] overflow-hidden">
-            <div className="group-hover:animate-scroll-text absolute w-full pb-4">
-              {abilityText.map((sentence, i) => (
-                <li key={i} className="list-none mb-1">{sentence}.</li>   
-              ))}
+          {/* 5. Ability description */}
+          <div className="p-3 sm:p-4 flex-grow text-xs sm:text-sm text-gray-300 bg-gray-900/50 text-left">
+            <div className="font-semibold text-yellow-400 mb-2">Leader Ability:</div>
+            <div className="relative h-full overflow-hidden">
+              <div className="group-hover:animate-scroll-text absolute w-full pb-4">
+                {abilityText.map((sentence, i) => (
+                  <li key={i} className="list-none mb-1">{sentence}.</li>   
+                ))}
+              </div>
             </div>
           </div>
         </div>

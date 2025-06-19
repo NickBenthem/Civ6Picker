@@ -75,16 +75,6 @@ export function useUserPresence(userId: string, name: string) {
     subscribedRef.current = true;
 
     /* Handler for full state syncs */
-    const syncHandler = () => {
-      const state: RealtimePresenceState<PresencePayload> =
-        channel.presenceState<PresencePayload>();
-
-      const everyone: ConnectedUser[] = Object.values(state)
-        .flat()
-        .map(({ presence_ref, ...rest }) => rest);
-
-      setConnectedUsers(everyone);
-    };
     const refreshFromState = () => {
         const state: RealtimePresenceState<PresencePayload> =
           channel.presenceState<PresencePayload>();

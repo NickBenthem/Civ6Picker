@@ -26,7 +26,7 @@ export function BanStageFooter({
         WebkitTransform: 'translateZ(0)',
         transform: 'translateZ(0)',
         // Safe area insets for iPhone - use calc to ensure proper positioning
-        paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)',
+        paddingBottom: '8px',
         paddingTop: '8px',
         // Ensure the footer is above browser UI
         WebkitOverflowScrolling: 'touch'
