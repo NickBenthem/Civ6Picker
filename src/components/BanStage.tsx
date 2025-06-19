@@ -16,8 +16,8 @@ type SortOption = 'civilization' | 'leader';
 type FilterOption = 'all' | 'banned' | 'available';
 
 export function BanStage({ userName, onBack }: BanStageProps) {
-  const { leaders, loading, toggleBanLeader } = useLeaders();
-  const { connectedUsers, isConnected } = useUserPresence(userName, userName);
+  const { leaders, loading, toggleBanLeader, isReconnecting: isLeaderReconnecting } = useLeaders();
+  const { connectedUsers, isConnected, isReconnecting } = useUserPresence(userName, userName);
   const [sortBy, setSortBy] = useState<SortOption>('leader');
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -200,6 +200,8 @@ export function BanStage({ userName, onBack }: BanStageProps) {
           userName={userName}
           connectedUsers={connectedUsers}
           isConnected={isConnected}
+          isReconnecting={isReconnecting}
+          isLeaderReconnecting={isLeaderReconnecting}
         />
 
         {/* Management Controls */}

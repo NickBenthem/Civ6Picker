@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { fetchLeaders, type Leader } from '../lib/supabase';
+import { createReconnectionManager } from '../utils/reconnectionManager';
 
 const supabaseUrl  = import.meta.env.NEXT_PUBLIC_SUPABASE_URL  as string;
 
@@ -18,6 +19,25 @@ export function useLeaders() {
   const [leaders, setLeaders] = useState<Leader[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [isReconnecting, setIsReconnecting] = useState(false);
+
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const reconnectionManagerRef = useRef(createReconnectionManager({
+    maxRetries: 12,
+    baseDelay: 1500,
+    maxDelay: 45000,
+    jitterFactor: 0.2,
+    onRetry: (attempt, delay) => {
+      console.log(`Reconnecting EventSource (attempt ${attempt}/${12}) in ${delay}ms`);
+      setIsReconnecting(true);
+      setError(new Error(`Leader updates connection lost. Reconnecting... (attempt ${attempt})`));
+    },
+    onMaxRetriesReached: () => {
+      console.error('Max reconnection attempts reached for EventSource');
+      setIsReconnecting(false);
+      setError(new Error('Failed to reconnect to leader updates after multiple attempts. Please refresh the page.'));
+    }
+  }));
 
   async function fetchLeadersData() {
     try {
@@ -83,30 +103,53 @@ export function useLeaders() {
     }
   }
 
-  useEffect(() => {
-    let eventSource: EventSource;
+  const setupEventSource = () => {
+    // Close existing connection if any
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+    }
 
+    // Create new EventSource connection
+    eventSourceRef.current = new EventSource(`${API_URL}/broadcast-leader-state`);
+
+    eventSourceRef.current.addEventListener('leader-updated', (event) => {
+      const updatedLeader = JSON.parse(event.data);
+      setLeaders(prevLeaders => 
+        sortLeaders(prevLeaders.map(leader => 
+          leader.id === updatedLeader.id ? updatedLeader : leader
+        ))
+      );
+    });
+
+    eventSourceRef.current.addEventListener('open', () => {
+      console.log('EventSource connection opened');
+      setIsReconnecting(false);
+      setError(null);
+      reconnectionManagerRef.current.reset(); // Reset retry counter on successful connection
+    });
+
+    eventSourceRef.current.addEventListener('error', (error) => {
+      console.error('EventSource failed:', error);
+      setIsReconnecting(true);
+      
+      // Schedule reconnection with backoff
+      reconnectionManagerRef.current.scheduleRetry(() => {
+        setupEventSource();
+      });
+    });
+
+    return eventSourceRef.current;
+  };
+
+  useEffect(() => {
     async function setupLeaders() {
       try {
         // Initial fetch
         await fetchLeadersData();
 
         // Setup Server-Sent Events connection
-        eventSource = new EventSource(`${API_URL}/broadcast-leader-state`);
-
-        eventSource.addEventListener('leader-updated', (event) => {
-          const updatedLeader = JSON.parse(event.data);
-          setLeaders(prevLeaders => 
-            sortLeaders(prevLeaders.map(leader => 
-              leader.id === updatedLeader.id ? updatedLeader : leader
-            ))
-          );
-        });
-
-        eventSource.onerror = (error) => {
-          console.error('EventSource failed:', error);
-          setError(new Error('Failed to maintain realtime connection'));
-        };
+        setupEventSource();
 
       } catch (e) {
         setError(e instanceof Error ? e : new Error('Failed to setup leaders'));
@@ -116,11 +159,13 @@ export function useLeaders() {
     setupLeaders();
 
     return () => {
-      if (eventSource) {
-        eventSource.close();
+      reconnectionManagerRef.current.cancel();
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
       }
     };
   }, []);
 
-  return { leaders, loading, error, toggleBanLeader };
+  return { leaders, loading, error, toggleBanLeader, isReconnecting };
 }

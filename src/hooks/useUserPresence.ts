@@ -5,6 +5,7 @@ import {
   RealtimePresenceState,
   SupabaseClient,
 } from '@supabase/supabase-js';
+import { createReconnectionManager } from '../utils/reconnectionManager';
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -38,10 +39,27 @@ export function useUserPresence(userId: string, name: string) {
   const [connectedUsers, setConnectedUsers] = useState<ConnectedUser[]>([]);
   const [isConnected,   setIsConnected]   = useState(false);
   const [error,         setError]         = useState<Error | null>(null);
+  const [isReconnecting, setIsReconnecting] = useState(false);
 
   /* One channel per tab — keep in a ref so it survives re-renders */
   const channelRef     = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const subscribedRef  = useRef(false); // guard against double subscribe
+  const reconnectionManagerRef = useRef(createReconnectionManager({
+    maxRetries: 15,
+    baseDelay: 1000,
+    maxDelay: 30000,
+    jitterFactor: 0.15,
+    onRetry: (attempt, delay) => {
+      console.log(`Reconnecting to presence channel (attempt ${attempt}/${15}) in ${delay}ms`);
+      setIsReconnecting(true);
+      setError(new Error(`Connection lost. Reconnecting... (attempt ${attempt})`));
+    },
+    onMaxRetriesReached: () => {
+      console.error('Max reconnection attempts reached for presence channel');
+      setIsReconnecting(false);
+      setError(new Error('Failed to reconnect after multiple attempts. Please refresh the page.'));
+    }
+  }));
 
   /* Key must be unique per tab (Supabase Presence requirement) */
   const presenceKey = useMemo(
@@ -49,17 +67,7 @@ export function useUserPresence(userId: string, name: string) {
     [userId],
   );
 
-  useEffect(() => {
-    const handleUnload = () => {
-      if (!channel) return;
-      /* Tell the server we’re gone NOW */
-      channel.untrack();        // sends Presence LEAVE
-      channel.unsubscribe();    // closes socket if idle
-      supabase.removeChannel(channel);
-    };
-    
-    window.addEventListener('pagehide', handleUnload); // pagehide works with bfcache
-    
+  const setupChannel = () => {
     /* Lazily create the channel only once */
     if (!channelRef.current) {
       channelRef.current = supabase.channel('user-presence', {
@@ -68,12 +76,10 @@ export function useUserPresence(userId: string, name: string) {
       timeout: 6000,          // ms
       });
     }
-    const channel = channelRef.current;
+    return channelRef.current;
+  };
 
-    /* Bail out if we already subscribed (Strict Mode double invoke) */
-    if (subscribedRef.current) return;
-    subscribedRef.current = true;
-
+  const subscribeToChannel = (channel: ReturnType<typeof supabase.channel>) => {
     /* Handler for full state syncs */
     const refreshFromState = () => {
         const state: RealtimePresenceState<PresencePayload> =
@@ -85,7 +91,8 @@ export function useUserPresence(userId: string, name: string) {
             .map(({ presence_ref, ...rest }) => rest),
         );
       };
-    channel
+
+    return channel
         /* Full resync (first load or reconnect) */
         .on('presence', { event: 'sync' }, refreshFromState)
     
@@ -107,6 +114,10 @@ export function useUserPresence(userId: string, name: string) {
       .subscribe(async (status, err) => {
         if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
           setIsConnected(true);
+          setIsReconnecting(false);
+          setError(null);
+          reconnectionManagerRef.current.reset(); // Reset retry counter on successful connection
+          
           try {
             await channel.track({
               id: userId,
@@ -119,14 +130,48 @@ export function useUserPresence(userId: string, name: string) {
         }
 
         if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
-          console.error(err);
-          setError(err ?? new Error('Channel error'));
+          console.error('Presence channel error:', err);
           setIsConnected(false);
+          
+          // Schedule reconnection with backoff
+          reconnectionManagerRef.current.scheduleRetry(() => {
+            // Clean up old channel
+            if (channelRef.current) {
+              channelRef.current.unsubscribe();
+              channelRef.current = null;
+            }
+            subscribedRef.current = false;
+            
+            // Re-subscribe
+            const newChannel = setupChannel();
+            subscribeToChannel(newChannel);
+          });
         }
       });
+  };
+
+  useEffect(() => {
+    const handleUnload = () => {
+      if (!channelRef.current) return;
+      /* Tell the server we're gone NOW */
+      channelRef.current.untrack();        // sends Presence LEAVE
+      channelRef.current.unsubscribe();    // closes socket if idle
+      supabase.removeChannel(channelRef.current);
+    };
+    
+    window.addEventListener('pagehide', handleUnload); // pagehide works with bfcache
+    
+    const channel = setupChannel();
+
+    /* Bail out if we already subscribed (Strict Mode double invoke) */
+    if (subscribedRef.current) return;
+    subscribedRef.current = true;
+
+    subscribeToChannel(channel);
 
     /* Cleanup on unmount */
     return () => {
+      reconnectionManagerRef.current.cancel();
       if (channelRef.current) {
         channelRef.current.unsubscribe();
         channelRef.current = null;
@@ -135,5 +180,5 @@ export function useUserPresence(userId: string, name: string) {
     };
   }, [userId, name, presenceKey]);
 
-  return { connectedUsers, isConnected, error };
+  return { connectedUsers, isConnected, error, isReconnecting };
 }

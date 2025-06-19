@@ -1,14 +1,22 @@
 import React from 'react';
-import { Crown, Users } from 'lucide-react';
+import { Crown, Users, RefreshCw } from 'lucide-react';
 import { ConnectedUser } from '../hooks/useUserPresence';
 
 interface BanStageHeaderProps {
   userName: string;
   connectedUsers: ConnectedUser[];
   isConnected: boolean;
+  isReconnecting?: boolean;
+  isLeaderReconnecting?: boolean;
 }
 
-export function BanStageHeader({ userName, connectedUsers, isConnected }: BanStageHeaderProps) {
+export function BanStageHeader({ 
+  userName, 
+  connectedUsers, 
+  isConnected, 
+  isReconnecting = false,
+  isLeaderReconnecting = false 
+}: BanStageHeaderProps) {
   // Sort connected users by who joined first (online_at timestamp)
   const sortedConnectedUsers = React.useMemo(() => {
     return [...connectedUsers].sort((a, b) => {
@@ -17,6 +25,35 @@ export function BanStageHeader({ userName, connectedUsers, isConnected }: BanSta
       return timeA - timeB; // Sort by earliest first
     });
   }, [connectedUsers]);
+
+  const getConnectionStatus = () => {
+    if (isReconnecting || isLeaderReconnecting) {
+      return {
+        icon: <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />,
+        text: 'Reconnecting...',
+        color: 'text-yellow-500',
+        bgColor: 'bg-yellow-500'
+      };
+    }
+    
+    if (isConnected) {
+      return {
+        icon: null,
+        text: 'Connected',
+        color: 'text-gray-400',
+        bgColor: 'bg-green-500'
+      };
+    }
+    
+    return {
+      icon: null,
+      text: 'Disconnected',
+      color: 'text-gray-400',
+      bgColor: 'bg-red-500'
+    };
+  };
+
+  const connectionStatus = getConnectionStatus();
 
   return (
     <div className="max-w-7xl mx-auto mb-4 sm:mb-6">
@@ -37,14 +74,11 @@ export function BanStageHeader({ userName, connectedUsers, isConnected }: BanSta
             <span className="font-medium text-xs sm:text-sm lg:text-base truncate">{connectedUsers.length} Online</span>
             <div className="flex items-center gap-1 ml-auto flex-shrink-0">
               <div 
-                className={`w-2 h-2 rounded-full ${
-                  isConnected 
-                    ? 'bg-green-500 animate-pulse' 
-                    : 'bg-red-500'
-                }`} 
+                className={`w-2 h-2 rounded-full ${connectionStatus.bgColor}`} 
               />
-              <span className="text-xs text-gray-400 hidden sm:inline">
-                {isConnected ? 'Connected' : 'Disconnected'}
+              <span className={`text-xs ${connectionStatus.color} hidden sm:inline flex items-center gap-1`}>
+                {connectionStatus.icon}
+                {connectionStatus.text}
               </span>
             </div>
           </div>
