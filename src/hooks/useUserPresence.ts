@@ -119,14 +119,6 @@ export function useUserPresence(userId: string, name: string, lobbyCode: string)
           reconnectionManagerRef.current.reset(); // Reset retry counter on successful connection
           
           try {
-            // Get or create lobby first
-            const { data: lobbyData, error: lobbyError } = await supabase
-              .rpc('get_or_create_lobby', { lobby_code_param: lobbyCode });
-
-            if (lobbyError) {
-              throw lobbyError;
-            }
-
             // Track user presence with lobby information
             await channel.track({
               id: userId,
@@ -134,12 +126,12 @@ export function useUserPresence(userId: string, name: string, lobbyCode: string)
               online_at: new Date().toISOString(),
             });
 
-            // Also store in connected_users table with lobby_id
+            // Also store in connected_users table with lobby_code
             await supabase
               .from('connected_users')
               .upsert({
                 user_name: name,
-                lobby_id: lobbyData,
+                lobby_code: lobbyCode,
                 last_seen: new Date().toISOString()
               }, {
                 onConflict: 'user_name'

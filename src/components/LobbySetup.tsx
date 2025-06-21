@@ -12,13 +12,27 @@ export function LobbySetup({ onReady, initialLobbyCode }: LobbySetupProps) {
   const [userName, setUserName] = useState('');
   const [isLobbyValid, setIsLobbyValid] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [invalidLobbyMessage, setInvalidLobbyMessage] = useState('');
 
   // Set initial lobby code on component mount
   useEffect(() => {
-    if (initialLobbyCode && isValidLobbyCode(initialLobbyCode)) {
+    if (initialLobbyCode && initialLobbyCode.trim() !== '' && isValidLobbyCode(initialLobbyCode)) {
       setLobbyCode(initialLobbyCode);
+      setInvalidLobbyMessage('');
     } else {
-      setLobbyCode(generateLobbyCode());
+      const generatedCode = generateLobbyCode();
+      setLobbyCode(generatedCode);
+      if (initialLobbyCode && initialLobbyCode.trim() !== '') {
+        setInvalidLobbyMessage(`Invalid lobby code format: "${initialLobbyCode}". Please use the format XXX-XXX (e.g., ABC-123)`);
+      }
+    }
+  }, [initialLobbyCode]);
+
+  // Update lobby code input when initialLobbyCode becomes available
+  useEffect(() => {
+    if (initialLobbyCode && initialLobbyCode.trim() !== '' && isValidLobbyCode(initialLobbyCode)) {
+      setLobbyCode(initialLobbyCode);
+      setInvalidLobbyMessage('');
     }
   }, [initialLobbyCode]);
 
@@ -73,6 +87,12 @@ export function LobbySetup({ onReady, initialLobbyCode }: LobbySetupProps) {
           <p className="text-xs sm:text-sm lg:text-base text-gray-400">Join the multiplayer leader ban phase</p>
         </div>
 
+        {invalidLobbyMessage && (
+          <div className="mb-4 p-3 bg-red-900/50 border border-red-500/50 rounded-lg">
+            <p className="text-sm text-red-300">{invalidLobbyMessage}</p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 lg:space-y-6">
           {/* Lobby Code Input */}
           <div>
@@ -115,7 +135,9 @@ export function LobbySetup({ onReady, initialLobbyCode }: LobbySetupProps) {
               </div>
             </div>
             {!isLobbyValid && lobbyCode && (
-              <p className="text-xs text-red-400 mt-1">Please enter a valid lobby code (XXX-XXX)</p>
+              <p className="text-xs text-red-400 mt-1">
+                {invalidLobbyMessage || 'Please enter a valid lobby code (XXX-XXX)'}
+              </p>
             )}
           </div>
 

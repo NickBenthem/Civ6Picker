@@ -22,9 +22,6 @@ CREATE TABLE IF NOT EXISTS leaders (
   civilization_id uuid NOT NULL,
   image_key text NOT NULL,
   ability text NOT NULL,
-  is_banned boolean DEFAULT false,
-  banned_by text,
-  banned_at timestamptz,
   created_at timestamptz DEFAULT now(),
   CONSTRAINT fk_civilization
     FOREIGN KEY (civilization_id)
@@ -74,6 +71,7 @@ CREATE TABLE IF NOT EXISTS votes (
 -- Create connected_users table
 CREATE TABLE IF NOT EXISTS connected_users (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  lobby_code text,
   user_name text NOT NULL UNIQUE,
   last_seen timestamptz DEFAULT now(),
   created_at timestamptz DEFAULT now()
@@ -98,12 +96,6 @@ CREATE POLICY "Anyone can read civilizations"
 CREATE POLICY "Anyone can read leaders"
   ON leaders
   FOR SELECT
-  TO anon, authenticated
-  USING (true);
-
-CREATE POLICY "Anyone can update leaders"
-  ON leaders
-  FOR UPDATE
   TO anon, authenticated
   USING (true);
 
@@ -133,6 +125,22 @@ CREATE POLICY "Anyone can insert votes"
   FOR INSERT
   TO anon, authenticated
   WITH CHECK (true);
+
+  -- Add UPDATE policy for votes
+CREATE POLICY "Anyone can update votes"
+  ON votes
+  FOR UPDATE
+  TO anon, authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Add DELETE policy for votes
+CREATE POLICY "Anyone can delete votes"
+  ON votes
+  FOR DELETE
+  TO anon, authenticated
+  USING (true);
+
 
 -- Create policies for connected_users
 CREATE POLICY "Anyone can read connected users"

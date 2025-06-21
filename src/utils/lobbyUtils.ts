@@ -8,6 +8,11 @@ export function generateLobbyCode(): string {
 
 // Validate lobby code format
 export function isValidLobbyCode(code: string): boolean {
+  // Check for empty or undefined values
+  if (!code || code.trim() === '') {
+    return false;
+  }
+  
   const lobbyCodeRegex = /^[A-Z0-9]{3}-[A-Z0-9]{3}$/;
   return lobbyCodeRegex.test(code.toUpperCase());
 }
