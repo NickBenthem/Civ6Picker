@@ -56,7 +56,7 @@ export function BanStageFooter({
         <div className="max-w-7xl mx-auto p-2 sm:p-3">
           <div className="flex flex-row items-stretch w-full gap-4">
             {/* Instructions */}
-            <div className="flex-1 bg-gray-900/70 border border-gray-700 rounded-lg px-4 py-1.5 flex items-center justify-center text-center min-h-[48px]">
+            <div className="flex-1 bg-gray-900/70 border border-gray-700 rounded-lg px-3 py-1 flex items-center justify-center text-center min-h-[48px]">
               <span className="font-semibold text-base text-white mr-2">How to use:</span>
               <span className="text-sm text-gray-300">Click to ban/unban leaders</span>
             </div>
