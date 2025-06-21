@@ -9,15 +9,16 @@ import { BanStageFooter } from './BanStageFooter';
 
 interface BanStageProps {
   userName: string;
+  lobbyCode: string;
   onBack: () => void;
 }
 
 type SortOption = 'civilization' | 'leader' | 'lastUpdated';
 type FilterOption = 'all' | 'banned' | 'available';
 
-export function BanStage({ userName, onBack }: BanStageProps) {
-  const { leaders, loading, toggleBanLeader, isReconnecting: isLeaderReconnecting } = useLeaders();
-  const { connectedUsers, isConnected, isReconnecting } = useUserPresence(userName, userName);
+export function BanStage({ userName, lobbyCode, onBack }: BanStageProps) {
+  const { leaders, loading, toggleBanLeader, isReconnecting: isLeaderReconnecting } = useLeaders(lobbyCode);
+  const { connectedUsers, isConnected, isReconnecting } = useUserPresence(userName, userName, lobbyCode);
   const [sortBy, setSortBy] = useState<SortOption>('leader');
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -204,6 +205,7 @@ export function BanStage({ userName, onBack }: BanStageProps) {
         {/* Header */}
         <BanStageHeader
           userName={userName}
+          lobbyCode={lobbyCode}
           connectedUsers={connectedUsers}
           isConnected={isConnected}
           isReconnecting={isReconnecting}

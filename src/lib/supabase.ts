@@ -49,9 +49,9 @@ export type Vote = {
 const API_URL = 'https://ymllyikqdmsbldxfzmdl.supabase.co/functions/v1/fetch-leaders';
 
 // Function to fetch leaders
-export const fetchLeaders = async (): Promise<Leader[]> => {
+export const fetchLeaders = async (lobbyCode: string): Promise<Leader[]> => {
   try {
-    const response = await fetch(API_URL);
+    const response = await fetch(`${API_URL}?lobbyCode=${encodeURIComponent(lobbyCode)}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -66,7 +66,7 @@ export const fetchLeaders = async (): Promise<Leader[]> => {
 // Test the connection
 const testConnection = async () => {
   try {
-    const leaders = await fetchLeaders();
+    const leaders = await fetchLeaders('TEST-123');
     console.log('API connection test successful:', leaders);
   } catch (error) {
     console.error('API connection test failed:', error);

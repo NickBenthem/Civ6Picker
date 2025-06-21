@@ -6,7 +6,7 @@ const supabaseUrl  = import.meta.env.NEXT_PUBLIC_SUPABASE_URL  as string;
 
 const API_URL = `${supabaseUrl}/functions/v1`;
 
-export function useLeaders() {
+export function useLeaders(lobbyCode: string) {
   const [leaders, setLeaders] = useState<Leader[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -32,7 +32,7 @@ export function useLeaders() {
 
   async function fetchLeadersData() {
     try {
-      const data = await fetchLeaders();
+      const data = await fetchLeaders(lobbyCode);
       setLeaders(data);
     } catch (e) {
       setError(e instanceof Error ? e : new Error('Failed to fetch leaders'));
@@ -69,6 +69,7 @@ export function useLeaders() {
         body: JSON.stringify({
           leaderId,
           userName,
+          lobbyCode,
           isBanned: !currentLeader.is_banned
         })
       });
@@ -101,8 +102,8 @@ export function useLeaders() {
       eventSourceRef.current = null;
     }
 
-    // Create new EventSource connection
-    eventSourceRef.current = new EventSource(`${API_URL}/broadcast-leader-state`);
+    // Create new EventSource connection with lobby code
+    eventSourceRef.current = new EventSource(`${API_URL}/broadcast-leader-state?lobbyCode=${encodeURIComponent(lobbyCode)}`);
 
     eventSourceRef.current?.addEventListener('leader-updated', (event) => {
       const updatedLeader = JSON.parse(event.data);
@@ -147,7 +148,9 @@ export function useLeaders() {
       }
     }
 
-    setupLeaders();
+    if (lobbyCode) {
+      setupLeaders();
+    }
 
     return () => {
       reconnectionManagerRef.current.cancel();
@@ -156,7 +159,7 @@ export function useLeaders() {
         eventSourceRef.current = null;
       }
     };
-  }, []);
+  }, [lobbyCode]);
 
   return { leaders, loading, error, toggleBanLeader, isReconnecting };
 }

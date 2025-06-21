@@ -35,7 +35,7 @@ const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey, {
 /* ------------------------------------------------------------------ */
 /* Presence hook                                                       */
 /* ------------------------------------------------------------------ */
-export function useUserPresence(userId: string, name: string) {
+export function useUserPresence(userId: string, name: string, lobbyCode: string) {
   const [connectedUsers, setConnectedUsers] = useState<ConnectedUser[]>([]);
   const [isConnected,   setIsConnected]   = useState(false);
   const [error,         setError]         = useState<Error | null>(null);
@@ -70,7 +70,7 @@ export function useUserPresence(userId: string, name: string) {
   const setupChannel = () => {
     /* Lazily create the channel only once */
     if (!channelRef.current) {
-      channelRef.current = supabase.channel('user-presence', {
+      channelRef.current = supabase.channel(`user-presence-${lobbyCode}`, {
         config: { presence: { key: presenceKey } },
       // @ts-expect-error: `timeout` not yet in the public typings
       timeout: 6000,          // ms
@@ -119,11 +119,32 @@ export function useUserPresence(userId: string, name: string) {
           reconnectionManagerRef.current.reset(); // Reset retry counter on successful connection
           
           try {
+            // Get or create lobby first
+            const { data: lobbyData, error: lobbyError } = await supabase
+              .rpc('get_or_create_lobby', { lobby_code_param: lobbyCode });
+
+            if (lobbyError) {
+              throw lobbyError;
+            }
+
+            // Track user presence with lobby information
             await channel.track({
               id: userId,
               name,
               online_at: new Date().toISOString(),
             });
+
+            // Also store in connected_users table with lobby_id
+            await supabase
+              .from('connected_users')
+              .upsert({
+                user_name: name,
+                lobby_id: lobbyData,
+                last_seen: new Date().toISOString()
+              }, {
+                onConflict: 'user_name'
+              });
+
           } catch (trackErr) {
             setError(trackErr as Error);
           }
@@ -178,7 +199,7 @@ export function useUserPresence(userId: string, name: string) {
       }
       subscribedRef.current = false;
     };
-  }, [userId, name, presenceKey]);
+  }, [userId, name, presenceKey, lobbyCode]);
 
   return { connectedUsers, isConnected, error, isReconnecting };
 }

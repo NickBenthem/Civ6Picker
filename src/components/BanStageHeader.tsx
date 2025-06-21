@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Crown, Users, RefreshCw, LogOut, User, ChevronDown } from 'lucide-react';
+import { Crown, Users, RefreshCw, LogOut, User, ChevronDown, Copy } from 'lucide-react';
 import { ConnectedUser } from '../hooks/useUserPresence';
 import { ConfirmationDialog } from './ConfirmationDialog';
 
 interface BanStageHeaderProps {
   userName: string;
+  lobbyCode: string;
   connectedUsers: ConnectedUser[];
   isConnected: boolean;
   isReconnecting?: boolean;
@@ -15,6 +16,7 @@ interface BanStageHeaderProps {
 
 export function BanStageHeader({ 
   userName, 
+  lobbyCode,
   connectedUsers, 
   isConnected, 
   isReconnecting = false,
@@ -74,6 +76,15 @@ export function BanStageHeader({
     };
   };
 
+  const handleCopyLobbyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(lobbyCode);
+      // You could add a toast notification here if desired
+    } catch (err) {
+      console.error('Failed to copy lobby code:', err);
+    }
+  };
+
   const connectionStatus = getConnectionStatus();
 
   return (
@@ -85,7 +96,7 @@ export function BanStageHeader({
             <Crown className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-500 flex-shrink-0" />
             <div className="min-w-0 flex-1">
               <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-white truncate">Civ6 Leader Ban Stage</h1>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <p className="text-xs sm:text-sm lg:text-base text-gray-400">Playing as:</p>
                 {/* User Menu */}
                 <div className="relative" ref={userMenuRef}>
@@ -132,6 +143,21 @@ export function BanStageHeader({
                       </div>
                     </div>
                   )}
+                </div>
+                
+                {/* Lobby Code Display */}
+                <div className="flex items-center gap-2 text-gray-400">
+                  <span className="text-xs sm:text-sm lg:text-base">Lobby:</span>
+                  <div className="flex items-center gap-1 bg-gray-700/50 px-2 py-1 rounded">
+                    <span className="text-xs sm:text-sm font-mono text-yellow-500">{lobbyCode}</span>
+                    <button
+                      onClick={handleCopyLobbyCode}
+                      className="p-1 text-gray-400 hover:text-white transition-colors"
+                      title="Copy lobby code"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
