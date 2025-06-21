@@ -50,7 +50,5 @@ BEGIN
         'Kristina',
         'Jadwiga',
         'Alexander'
-    )
-    ON CONFLICT (leader_id, user_id, lobby_id, vote_type) DO NOTHING;
-    
+    );    
 END $$; 

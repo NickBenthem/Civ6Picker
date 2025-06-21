@@ -160,3 +160,13 @@ COMMENT ON INDEX idx_leaders_name IS 'Optimizes leader name search functionality
 COMMENT ON INDEX idx_connected_users_lobby_code IS 'Optimizes lobby code lookups in connected_users table';
 COMMENT ON INDEX idx_connected_users_lobby_user IS 'Optimizes user presence lookups per lobby using lobby code';
 COMMENT ON INDEX idx_votes_active IS 'Optimizes active vote queries (lobby-specific)'; 
+
+
+
+ALTER TABLE votes 
+ADD CONSTRAINT votes_leader_user_lobby_type_unique 
+UNIQUE (leader_id, user_id, lobby_id, vote_type);
+
+-- Add comment explaining the constraint
+COMMENT ON CONSTRAINT votes_leader_user_lobby_type_unique ON votes 
+IS 'Ensures each user can only have one vote per leader per lobby per vote type'; 
