@@ -163,7 +163,7 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
                 src={`/images/units/${uniqueUnit.image_key}`}
                 alt={uniqueUnit.name}
                 className="w-5 h-5 sm:w-6 sm:h-6"
-                onError={handleImageError(`/images/units/${uniqueUnit.image_key}`, '/images/placeholder.png')}
+                onError={handleImageError(`/images/units/${uniqueUnit.image_key}`, '/images/units/placeholder.png')}
               />
               <span className="truncate text-xs sm:text-sm">{uniqueUnit.name}</span>
             </div>
@@ -174,7 +174,7 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
                 src={`/images/infrastructure/${uniqueInfra.image_key}`}
                 alt={uniqueInfra.name}
                 className="w-5 h-5 sm:w-6 sm:h-6"
-                onError={handleImageError(`/images/infrastructure/${uniqueInfra.image_key}`, '/images/placeholder.png')}
+                onError={handleImageError(`/images/infrastructure/${uniqueInfra.image_key}`, '/images/infrastructure/placeholder.png')}
               />
               <span className="truncate text-xs sm:text-sm">{uniqueInfra.name}</span>
             </div>
