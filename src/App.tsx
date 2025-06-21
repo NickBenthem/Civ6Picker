@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { LobbySetup } from './components/LobbySetup';
 import { BanStage } from './components/BanStage';
-import { loadUser, saveUser, clearUser } from './utils/userPersistence';
+import { loadUser, saveUser, clearUser, loadLastLobbyCode } from './utils/userPersistence';
 import { isValidLobbyCode } from './utils/lobbyUtils';
 
 // Component to handle lobby routes with proper parameter extraction
@@ -64,7 +64,7 @@ function LobbyRouteHandler() {
   }, [lobbyCode, location.pathname]);
 
   const handleReady = (lobbyCode: string, name: string) => {
-    saveUser(name);
+    saveUser(name, lobbyCode);
     setUserName(name);
     setCurrentLobby(lobbyCode);
     navigate(`/${lobbyCode}`);
@@ -133,6 +133,12 @@ function App() {
       const lobbyCode = extractLobbyCodeFromPath(location.pathname);
       if (lobbyCode) {
         setCurrentLobby(lobbyCode);
+      } else {
+        // If no lobby code in URL, try to load the last lobby code from localStorage
+        const lastLobbyCode = loadLastLobbyCode();
+        if (lastLobbyCode && isValidLobbyCode(lastLobbyCode)) {
+          setCurrentLobby(lastLobbyCode);
+        }
       }
 
       setIsLoading(false);
@@ -148,13 +154,19 @@ function App() {
       if (lobbyCode) {
         setCurrentLobby(lobbyCode);
       } else {
-        setCurrentLobby(null);
+        // If no lobby code in URL, try to load the last lobby code from localStorage
+        const lastLobbyCode = loadLastLobbyCode();
+        if (lastLobbyCode && isValidLobbyCode(lastLobbyCode)) {
+          setCurrentLobby(lastLobbyCode);
+        } else {
+          setCurrentLobby(null);
+        }
       }
     }
   }, [location.pathname, isLoading]);
 
   const handleReady = (lobbyCode: string, name: string) => {
-    saveUser(name);
+    saveUser(name, lobbyCode);
     setUserName(name);
     setCurrentLobby(lobbyCode);
     navigate(`/${lobbyCode}`);
@@ -182,7 +194,7 @@ function App() {
       <Route 
         path="/" 
         element={
-          <LobbySetup onReady={handleReady} />
+          <LobbySetup onReady={handleReady} initialLobbyCode={currentLobby || undefined} />
         } 
       />
       
