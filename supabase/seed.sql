@@ -191,7 +191,7 @@ INSERT INTO unique_infrastructure (civilization_id, name, image_key) SELECT c.id
 INSERT INTO unique_infrastructure (civilization_id, name, image_key) SELECT c.id, 'Bath', 'Aqueduct__Civ6_.png' FROM civilizations c WHERE c.name = 'Roman';
 INSERT INTO unique_infrastructure (civilization_id, name, image_key) SELECT c.id, 'Château', 'Ch_teau__Civ6_.png' FROM civilizations c WHERE c.name = 'French';
 INSERT INTO unique_infrastructure (civilization_id, name, image_key) SELECT c.id, 'Chemamull', 'Chemamull__Civ6_.png' FROM civilizations c WHERE c.name = 'Mapuche';
-INSERT INTO unique_infrastructure (civilization_id, name, image_key) SELECT c.id, 'Copacabana', 'Brazilian__Civ6_.png' FROM civilizations c WHERE c.name = 'Brazilian';
+INSERT INTO unique_infrastructure (civilization_id, name, image_key) SELECT c.id, 'Copacabana', 'Water_Park__Civ6_.png' FROM civilizations c WHERE c.name = 'Brazilian';
 INSERT INTO unique_infrastructure (civilization_id, name, image_key) SELECT c.id, 'Cothon', 'Harbor__Civ6_.png' FROM civilizations c WHERE c.name = 'Phoenician';
 INSERT INTO unique_infrastructure (civilization_id, name, image_key) SELECT c.id, 'Electronics Factory', 'Electronics_Factory__Civ6_.png' FROM civilizations c WHERE c.name = 'Japanese';
 INSERT INTO unique_infrastructure (civilization_id, name, image_key) SELECT c.id, 'Film Studio', 'Film_Studio__Civ6_.png' FROM civilizations c WHERE c.name = 'American';
