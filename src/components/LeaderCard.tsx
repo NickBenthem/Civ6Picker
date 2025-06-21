@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Ban, User, RotateCcw } from 'lucide-react';
 import { Leader } from '../lib/supabase';
 
@@ -9,6 +9,25 @@ interface LeaderCardProps {
 }
 
 export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+
+  const handleImageError = (imagePath: string, fallbackPath: string) => (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const img = e.currentTarget;
+    
+    // If this image has already failed, don't try to set a fallback again
+    if (failedImages.has(img.src)) {
+      return;
+    }
+    
+    // Mark this image as failed
+    setFailedImages(prev => new Set(prev).add(img.src));
+    
+    // Only set fallback if we're not already trying to load the fallback
+    if (img.src !== fallbackPath) {
+      img.src = fallbackPath;
+    }
+  };
+
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -67,9 +86,7 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
                 w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 object-cover transition-all duration-300
                 ${leader.is_banned ? 'grayscale brightness-50' : ''}
               `}
-              onError={(e) => {
-                e.currentTarget.src = '/images/leaders/placeholder.png';
-              }}
+              onError={handleImageError(`/images/leaders/${leader.image_key}`, '/images/leaders/placeholder.png')}
             />
 
             {/* Ban overlays */}
@@ -146,9 +163,7 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
                 src={`/images/units/${uniqueUnit.image_key}`}
                 alt={uniqueUnit.name}
                 className="w-5 h-5 sm:w-6 sm:h-6"
-                onError={(e) => {
-                  e.currentTarget.src = '/images/placeholder.png';
-                }}
+                onError={handleImageError(`/images/units/${uniqueUnit.image_key}`, '/images/placeholder.png')}
               />
               <span className="truncate text-xs sm:text-sm">{uniqueUnit.name}</span>
             </div>
@@ -159,9 +174,7 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
                 src={`/images/infrastructure/${uniqueInfra.image_key}`}
                 alt={uniqueInfra.name}
                 className="w-5 h-5 sm:w-6 sm:h-6"
-                onError={(e) => {
-                  e.currentTarget.src = '/images/placeholder.png';
-                }}
+                onError={handleImageError(`/images/infrastructure/${uniqueInfra.image_key}`, '/images/placeholder.png')}
               />
               <span className="truncate text-xs sm:text-sm">{uniqueInfra.name}</span>
             </div>
