@@ -18,7 +18,7 @@ BEGIN
     SELECT l.id, 'Martin', 'ban', target_lobby_id
     FROM leaders l
     WHERE l.name = 'Wu Zetian'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (leader_id, user_id, lobby_id, vote_type) DO NOTHING;
     
     INSERT INTO votes (leader_id, user_id, vote_type, lobby_id)
     SELECT l.id, 'Nick', 'ban', target_lobby_id
@@ -51,6 +51,6 @@ BEGIN
         'Jadwiga',
         'Alexander'
     )
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (leader_id, user_id, lobby_id, vote_type) DO NOTHING;
     
 END $$; 

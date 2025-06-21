@@ -106,7 +106,7 @@ serve(async (req) => {
             lobby_id: lobbyData,
             vote_type: 'ban'
           }, {
-            onConflict: 'leader_id,lobby_id,vote_type'
+            onConflict: 'leader_id,user_id,lobby_id,vote_type'
           });
 
         if (voteError) {
