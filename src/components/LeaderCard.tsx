@@ -48,8 +48,8 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
   .map((s) => s.trim())
   .filter(Boolean);          // remove empty strings
 
-  const uniqueUnit = leader.civilization?.unique_units?.[0];
-  const uniqueInfra = leader.civilization?.unique_infrastructure?.[0];
+  const uniqueUnits = leader.civilization?.unique_units || [];
+  const uniqueInfrastructure = leader.civilization?.unique_infrastructure || [];
 
   return (
     <div
@@ -155,28 +155,36 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
           </p>
         </div>
 
-        {/* 3. Unique unit / infra */}
-        <div className="p-3 sm:p-4 flex flex-col items-center gap-2">
-          {uniqueUnit && (
-            <div className="flex items-center gap-1 text-blue-400 bg-blue-900/30 rounded px-2 py-1">
-              <img
-                src={`/images/units/${uniqueUnit.image_key}`}
-                alt={uniqueUnit.name}
-                className="w-5 h-5 sm:w-6 sm:h-6"
-                onError={handleImageError(`/images/units/${uniqueUnit.image_key}`, '/images/units/placeholder.png')}
-              />
-              <span className="truncate text-xs sm:text-sm">{uniqueUnit.name}</span>
+        {/* 3. Unique units / infrastructure */}
+        <div className="p-3 sm:p-4 flex flex-col items-center gap-1">
+          {uniqueUnits.length > 0 && (
+            <div className="flex flex-col gap-1 w-full">
+              {uniqueUnits.map((unit, index) => (
+                <div key={unit.id} className="flex items-center gap-1.5 text-blue-400 bg-blue-900/30 rounded px-2 py-1">
+                  <img
+                    src={`/images/units/${unit.image_key}`}
+                    alt={unit.name}
+                    className="w-5 h-5 sm:w-6 sm:h-6"
+                    onError={handleImageError(`/images/units/${unit.image_key}`, '/images/units/placeholder.png')}
+                  />
+                  <span className="truncate text-xs sm:text-sm">{unit.name}</span>
+                </div>
+              ))}
             </div>
           )}
-          {uniqueInfra && (
-            <div className="flex items-center gap-1 text-green-400 bg-green-900/30 rounded px-2 py-1">
-              <img
-                src={`/images/infrastructure/${uniqueInfra.image_key}`}
-                alt={uniqueInfra.name}
-                className="w-5 h-5 sm:w-6 sm:h-6"
-                onError={handleImageError(`/images/infrastructure/${uniqueInfra.image_key}`, '/images/infrastructure/placeholder.png')}
-              />
-              <span className="truncate text-xs sm:text-sm">{uniqueInfra.name}</span>
+          {uniqueInfrastructure.length > 0 && (
+            <div className="flex flex-col gap-1 w-full">
+              {uniqueInfrastructure.map((infra, index) => (
+                <div key={infra.id} className="flex items-center gap-1.5 text-green-400 bg-green-900/30 rounded px-2 py-1">
+                  <img
+                    src={`/images/infrastructure/${infra.image_key}`}
+                    alt={infra.name}
+                    className="w-5 h-5 sm:w-6 sm:h-6"
+                    onError={handleImageError(`/images/infrastructure/${infra.image_key}`, '/images/infrastructure/placeholder.png')}
+                  />
+                  <span className="truncate text-xs sm:text-sm">{infra.name}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>
