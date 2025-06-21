@@ -146,11 +146,11 @@ INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Domrey
 INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Dromon', 'Dromon__Civ6_.png' FROM civilizations c WHERE c.name = 'Byzantine';
 INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Eagle Warrior', 'Eagle_Warrior__Civ6_.png' FROM civilizations c WHERE c.name = 'Aztec';
 INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Gaesatae', 'Gaesatae__Civ6_.png' FROM civilizations c WHERE c.name = 'Gallic';
-INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Garde Impériale', 'Garde_Impériale__Civ6_.png' FROM civilizations c WHERE c.name = 'French';
+INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Garde Impériale', 'Garde_Imp_riale__Civ6_.png' FROM civilizations c WHERE c.name = 'French';
 INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Highlander', 'Highlander__Civ6_.png' FROM civilizations c WHERE c.name = 'Scottish';
 INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Hoplite', 'Hoplite__Civ6_.png' FROM civilizations c WHERE c.name = 'Greek';
 INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Hulche', 'Hulche__Civ6_.png' FROM civilizations c WHERE c.name = 'Mayan';
-INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Huszár', 'Huszár__Civ6_.png' FROM civilizations c WHERE c.name = 'Hungarian';
+INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Huszár', 'Husz_r__Civ6_.png' FROM civilizations c WHERE c.name = 'Hungarian';
 INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Hwacha', 'Hwacha__Civ6_.png' FROM civilizations c WHERE c.name = 'Korean';
 INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Hypaspist, Hetairoi, Settler', 'Hypaspist__Civ6_.png, Hetairoi__Civ6_.png, Settler__Civ6_.png' FROM civilizations c WHERE c.name = 'Macedonian';
 INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Hypaspist', 'Hypaspist__Civ6_.png' FROM civilizations c WHERE c.name = 'Macedonian';
@@ -172,7 +172,7 @@ INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Ngao M
 INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Okihtcitaw', 'Okihtcitaw__Civ6_.png' FROM civilizations c WHERE c.name = 'Cree';
 INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Oromo Cavalry', 'Oromo_Cavalry__Civ6_.png' FROM civilizations c WHERE c.name = 'Ethiopian';
 INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'P-51 Mustang', 'P-51_Mustang__Civ6_.png' FROM civilizations c WHERE c.name = 'American';
-INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Pítati Archer', 'Pítati_Archer__Civ6_.png' FROM civilizations c WHERE c.name = 'Nubian';
+INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Pítati Archer', 'P_tati_Archer__Civ6_.png' FROM civilizations c WHERE c.name = 'Nubian';
 INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Sabum Kibittum', 'Sabum_Kibittum__Civ6_.png' FROM civilizations c WHERE c.name = 'Babylonian';
 INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Saka Horse Archer', 'Saka_Horse_Archer__Civ6_.png' FROM civilizations c WHERE c.name = 'Scythian';
 INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Samurai', 'Samurai__Civ6_.png' FROM civilizations c WHERE c.name = 'Japanese';
@@ -189,7 +189,7 @@ INSERT INTO unique_units (civilization_id, name, image_key) SELECT c.id, 'Winged
 INSERT INTO unique_infrastructure (civilization_id, name, image_key) SELECT c.id, 'Acropolis', 'Theater_Square__Civ6_.png' FROM civilizations c WHERE c.name = 'Greek';
 INSERT INTO unique_infrastructure (civilization_id, name, image_key) SELECT c.id, 'Basilikoi Paides', 'Basilikoi_Paides__Civ6_.png' FROM civilizations c WHERE c.name = 'Macedonian';
 INSERT INTO unique_infrastructure (civilization_id, name, image_key) SELECT c.id, 'Bath', 'Aqueduct__Civ6_.png' FROM civilizations c WHERE c.name = 'Roman';
-INSERT INTO unique_infrastructure (civilization_id, name, image_key) SELECT c.id, 'Château', 'Château__Civ6_.png' FROM civilizations c WHERE c.name = 'French';
+INSERT INTO unique_infrastructure (civilization_id, name, image_key) SELECT c.id, 'Château', 'Ch_teau__Civ6_.png' FROM civilizations c WHERE c.name = 'French';
 INSERT INTO unique_infrastructure (civilization_id, name, image_key) SELECT c.id, 'Chemamull', 'Chemamull__Civ6_.png' FROM civilizations c WHERE c.name = 'Mapuche';
 INSERT INTO unique_infrastructure (civilization_id, name, image_key) SELECT c.id, 'Copacabana', 'Copacabana__Civ6_.png' FROM civilizations c WHERE c.name = 'Brazilian';
 INSERT INTO unique_infrastructure (civilization_id, name, image_key) SELECT c.id, 'Cothon', 'Harbor__Civ6_.png' FROM civilizations c WHERE c.name = 'Phoenician';
