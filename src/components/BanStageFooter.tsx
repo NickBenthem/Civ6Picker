@@ -25,12 +25,12 @@ export function BanStageFooter({
             {!isScrolled && (
               <div className="w-full flex flex-col gap-1">
                 {/* Instructions */}
-                <div className="w-full bg-gray-900/70 border border-gray-700 rounded-lg px-2 py-1 flex items-center justify-center text-center">
+                <div className="w-full bg-gray-900/70 border border-gray-700 rounded-lg px-2 py-0.5 flex items-center justify-center text-center">
                   <span className="font-semibold text-sm text-white mr-2">How to use:</span>
                   <span className="text-xs text-gray-300">Click to ban/unban leaders</span>
                 </div>
                 {/* Attribution */}
-                <div className="w-full bg-gray-900/70 border border-gray-700 rounded-lg px-2 py-1 flex items-center justify-center text-center">
+                <div className="w-full bg-gray-900/70 border border-gray-700 rounded-lg px-2 py-0.5 flex items-center justify-center text-center">
                   <span className="font-semibold text-sm text-white">Created by <a href="https://github.com/nickbenthem" target="_blank" rel="noopener noreferrer" className="text-yellow-500 hover:text-yellow-400 transition-colors font-bold">NickBenthem</a></span>
                 </div>
               </div>
@@ -56,16 +56,16 @@ export function BanStageFooter({
         <div className="max-w-7xl mx-auto p-2 sm:p-3">
           <div className="flex flex-row items-stretch w-full gap-4">
             {/* Instructions */}
-            <div className="flex-1 bg-gray-900/70 border border-gray-700 rounded-lg px-4 py-2 flex items-center justify-center text-center min-h-[48px]">
+            <div className="flex-1 bg-gray-900/70 border border-gray-700 rounded-lg px-4 py-1.5 flex items-center justify-center text-center min-h-[48px]">
               <span className="font-semibold text-base text-white mr-2">How to use:</span>
               <span className="text-sm text-gray-300">Click to ban/unban leaders</span>
             </div>
             {/* Attribution */}
-            <div className="flex-1 bg-gray-900/70 border border-gray-700 rounded-lg px-4 py-2 flex items-center justify-center text-center min-h-[48px]">
+            <div className="flex-1 bg-gray-900/70 border border-gray-700 rounded-lg px-4 py-1.5 flex items-center justify-center text-center min-h-[48px]">
               <span className="font-semibold text-base text-white">Created by <a href="https://github.com/nickbenthem" target="_blank" rel="noopener noreferrer" className="text-yellow-500 hover:text-yellow-400 transition-colors font-bold">NickBenthem</a></span>
             </div>
             {/* Stats */}
-            <div className="flex-1 bg-gray-900/70 border border-gray-700 rounded-lg px-4 py-2 flex items-center justify-center text-center min-h-[48px]">
+            <div className="flex-1 bg-gray-900/70 border border-gray-700 rounded-lg px-4 py-1.5 flex items-center justify-center text-center min-h-[48px]">
               <span className="font-semibold text-base text-white mr-3">Stats</span>
               <span className="text-sm text-gray-300 mr-3">Total: {totalCount}</span>
               <span className="text-sm text-gray-300 mr-3">Banned: {bannedCount}</span>

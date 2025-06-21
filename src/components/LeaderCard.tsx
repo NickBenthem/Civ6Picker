@@ -220,7 +220,7 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
 
         {/* 6. Ban footer */}
         {leader.is_banned && leader.banned_by && (
-          <div className="p-3 sm:p-4 flex items-center justify-center gap-1 text-xs text-red-300 bg-red-900/30">
+          <div className="px-3 py-1.5 sm:px-4 sm:py-2 flex items-center justify-center gap-1 text-xs text-red-300 bg-red-900/30">
             <User className="w-3 h-3" />
             <span className="truncate">Banned by {leader.banned_by}</span>
           </div>
