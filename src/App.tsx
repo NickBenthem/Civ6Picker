@@ -76,7 +76,7 @@ function App() {
               onBack={handleLeaveSession} 
             />
           ) : (
-            <LobbySetup onReady={handleReady} />
+            <LobbySetup onReady={handleReady} initialLobbyCode={currentLobby || undefined} />
           )
         } 
       />

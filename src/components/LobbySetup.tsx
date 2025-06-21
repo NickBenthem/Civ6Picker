@@ -4,18 +4,23 @@ import { generateLobbyCode, isValidLobbyCode, normalizeLobbyCode } from '../util
 
 interface LobbySetupProps {
   onReady: (lobbyCode: string, userName: string) => void;
+  initialLobbyCode?: string;
 }
 
-export function LobbySetup({ onReady }: LobbySetupProps) {
+export function LobbySetup({ onReady, initialLobbyCode }: LobbySetupProps) {
   const [lobbyCode, setLobbyCode] = useState('');
   const [userName, setUserName] = useState('');
   const [isLobbyValid, setIsLobbyValid] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
 
-  // Generate a random lobby code on component mount
+  // Set initial lobby code on component mount
   useEffect(() => {
-    setLobbyCode(generateLobbyCode());
-  }, []);
+    if (initialLobbyCode && isValidLobbyCode(initialLobbyCode)) {
+      setLobbyCode(initialLobbyCode);
+    } else {
+      setLobbyCode(generateLobbyCode());
+    }
+  }, [initialLobbyCode]);
 
   // Validate lobby code whenever it changes
   useEffect(() => {
