@@ -156,7 +156,7 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
         </div>
 
         {/* 3. Unique units / infrastructure */}
-        <div className="p-3 sm:p-4 flex flex-col items-center gap-1">
+        <div className="px-3 py-1 sm:px-4 sm:py-1.5 flex flex-col items-center gap-1">
           {uniqueUnits.length > 0 && (
             <div className="flex flex-col gap-1 w-full">
               {uniqueUnits.map((unit, index) => (
