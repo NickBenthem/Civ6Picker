@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import {
   type BaseLeader,
   type Leader,
@@ -7,6 +8,7 @@ import {
 import { baseLeaders } from '../data/leaders';
 import { loadLobbyState, saveLobbyState } from '../utils/lobbyStateStorage';
 import { createReconnectionManager } from '../utils/reconnectionManager';
+import { supabase } from '../lib/supabaseClient';
 
 type LeaderBroadcastEvent =
   | {
@@ -65,7 +67,7 @@ export function useLeaders(lobbyCode: string) {
   const [isReconnecting, setIsReconnecting] = useState(false);
 
   const leadersRef = useRef<Leader[]>(leaders);
-  const socketRef = useRef<WebSocket | null>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
   const lastRequestIdRef = useRef<string | null>(null);
 
   const reconnectionManagerRef = useRef(
@@ -143,8 +145,8 @@ export function useLeaders(lobbyCode: string) {
       return updated;
     });
 
-    const socket = socketRef.current;
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
+    const channel = channelRef.current;
+    if (!channel) {
       return;
     }
 
@@ -158,7 +160,11 @@ export function useLeaders(lobbyCode: string) {
     };
 
     try {
-      socket.send(JSON.stringify(event));
+      await channel.send({
+        type: 'broadcast',
+        event: 'leader_event',
+        payload: event,
+      });
     } catch (e) {
       console.error('Failed to broadcast ban toggle:', e);
       setError(
@@ -167,91 +173,47 @@ export function useLeaders(lobbyCode: string) {
     }
   }
 
-  const setupSocket = () => {
+  const setupChannel = () => {
     if (!lobbyCode) {
       return null;
     }
 
-    if (socketRef.current) {
-      try {
-        socketRef.current.close();
-      } catch {
-        // ignore
-      }
-      socketRef.current = null;
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
     }
 
-    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const ws = new WebSocket(`${protocol}://${window.location.host}/api/ws`);
-
-    ws.addEventListener('open', () => {
-      setIsReconnecting(false);
-      setError(null);
-      reconnectionManagerRef.current.reset();
-
-      // Identify the lobby on the server
-      const initMessage = {
-        type: 'init',
-        lobbyCode,
-      };
-
-      try {
-        ws.send(JSON.stringify(initMessage));
-      } catch (e) {
-        console.error('Failed to send init message:', e);
-      }
-
-      // Ask existing clients for a snapshot if we do not have local state
-      const hasLocalState =
-        (loadLobbyState(lobbyCode)?.leaders.length ?? 0) > 0;
-      if (!hasLocalState) {
-        const requestId = crypto.randomUUID();
-        lastRequestIdRef.current = requestId;
-        const requestEvent: LeaderBroadcastEvent = {
-          type: 'state_request',
-          lobbyCode,
-          requestId,
-          requester: lobbyCode,
-        };
-        try {
-          ws.send(JSON.stringify(requestEvent));
-        } catch (e) {
-          console.error('Failed to send state request:', e);
-        }
-      }
+    const channel = supabase.channel(`lobby:${lobbyCode}`, {
+      config: {
+        broadcast: { self: false },
+      },
     });
 
-    ws.addEventListener('message', (eventMessage) => {
-      let event: LeaderBroadcastEvent;
-      try {
-        event = JSON.parse(String(eventMessage.data)) as LeaderBroadcastEvent;
-      } catch {
-        return;
-      }
+    channel.on('broadcast', { event: 'leader_event' }, (payload) => {
+      const event = payload.payload as LeaderBroadcastEvent;
 
       if (event.lobbyCode !== lobbyCode) {
         return;
       }
 
-        if (event.type === 'ban_toggled') {
-          setLeaders((prevLeaders) => {
-            const updated = prevLeaders.map((leader) =>
-              leader.id === event.leaderId
-                ? {
-                    ...leader,
-                    is_banned: event.isBanned,
-                    banned_by: event.isBanned ? event.userName : null,
-                    banned_at: event.isBanned ? event.timestamp : null,
-                  }
-                : leader
-            );
-            saveLobbyState(lobbyCode, toLeaderStates(updated));
-            return updated;
-          });
-        }
+      if (event.type === 'ban_toggled') {
+        setLeaders((prevLeaders) => {
+          const updated = prevLeaders.map((leader) =>
+            leader.id === event.leaderId
+              ? {
+                  ...leader,
+                  is_banned: event.isBanned,
+                  banned_by: event.isBanned ? event.userName : null,
+                  banned_at: event.isBanned ? event.timestamp : null,
+                }
+              : leader
+          );
+          saveLobbyState(lobbyCode, toLeaderStates(updated));
+          return updated;
+        });
+      }
 
       if (event.type === 'state_request') {
-        // Respond with our current snapshot
         try {
           const snapshot: LeaderBroadcastEvent = {
             type: 'state_snapshot',
@@ -261,9 +223,17 @@ export function useLeaders(lobbyCode: string) {
             sentBy: event.requester,
             timestamp: new Date().toISOString(),
           };
-          ws.send(JSON.stringify(snapshot));
+          channel
+            .send({
+              type: 'broadcast',
+              event: 'leader_event',
+              payload: snapshot,
+            })
+            .catch((e) => {
+              console.error('Failed to send state snapshot:', e);
+            });
         } catch (e) {
-          console.error('Failed to send state snapshot:', e);
+          console.error('Failed to prepare state snapshot:', e);
         }
       }
 
@@ -290,39 +260,57 @@ export function useLeaders(lobbyCode: string) {
       }
     });
 
-    ws.addEventListener('error', (err) => {
-      console.error('Leader socket error:', err);
-      setIsReconnecting(true);
-      reconnectionManagerRef.current.scheduleRetry(() => {
-        setupSocket();
-      });
+    channel.subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        setIsReconnecting(false);
+        setError(null);
+        reconnectionManagerRef.current.reset();
+
+        const hasLocalState =
+          (loadLobbyState(lobbyCode)?.leaders.length ?? 0) > 0;
+        if (!hasLocalState) {
+          const requestId = crypto.randomUUID();
+          lastRequestIdRef.current = requestId;
+          const requestEvent: LeaderBroadcastEvent = {
+            type: 'state_request',
+            lobbyCode,
+            requestId,
+            requester: lobbyCode,
+          };
+          channel
+            .send({
+              type: 'broadcast',
+              event: 'leader_event',
+              payload: requestEvent,
+            })
+            .catch((e) => {
+              console.error('Failed to send state request:', e);
+            });
+        }
+      }
+
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        setIsReconnecting(true);
+        reconnectionManagerRef.current.scheduleRetry(() => {
+          setupChannel();
+        });
+      }
     });
 
-    ws.addEventListener('close', () => {
-      setIsReconnecting(true);
-      reconnectionManagerRef.current.scheduleRetry(() => {
-        setupSocket();
-      });
-    });
-
-    socketRef.current = ws;
-    return ws;
+    channelRef.current = channel;
+    return channel;
   };
 
   useEffect(() => {
     if (lobbyCode) {
-      setupSocket();
+      setupChannel();
     }
 
     return () => {
       reconnectionManagerRef.current.cancel();
-      if (socketRef.current) {
-        try {
-          socketRef.current.close();
-        } catch {
-          // ignore
-        }
-        socketRef.current = null;
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
       }
     };
   }, [lobbyCode]);

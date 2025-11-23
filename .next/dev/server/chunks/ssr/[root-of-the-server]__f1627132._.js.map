@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 14, "column": 0}, "map": {"version":3,"sources":["file:///Users/nickb/git/Civ6Picker/app/page.tsx"],"sourcesContent":["import dynamic from 'next/dynamic';\n\nconst AppShell = dynamic(() => import('../src/AppShell'), {\n  ssr: false,\n});\n\nexport default function Page() {\n  return <AppShell />;\n}\n\n"],"names":[],"mappings":";;;;;AAAA;;;;AAEA,MAAM,WAAW,IAAA,0KAAO,EAAC;;;;;;IACvB,KAAK;;AAGQ,SAAS;IACtB,qBAAO,8OAAC;;;;;AACV"}}]
-}
