@@ -2065,6 +2065,14 @@ var _s = __turbopack_context__.k.signature();
 function LeaderCard({ leader, onToggleBan, disabled }) {
     _s();
     const [failedImages, setFailedImages] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(new Set());
+    const [isBonusExpanded, setIsBonusExpanded] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [isAbilityExpanded, setIsAbilityExpanded] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [isBonusOverflowing, setIsBonusOverflowing] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [isAbilityOverflowing, setIsAbilityOverflowing] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const bonusClampRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const abilityClampRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const bonusContentRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const abilityContentRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
     const handleImageError = (imagePath, fallbackPath)=>(e)=>{
             const img = e.currentTarget;
             // If this image has already failed, don't try to set a fallback again
@@ -2085,17 +2093,43 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
             onToggleBan(leader.id);
         }
     };
-    const abilityText = (leader.ability || '').split('.').map((s)=>s.trim()).filter(Boolean); // remove empty strings
-    const civilizationBonusText = (leader.civilization?.civilization_bonus || '').split('.').map((s)=>s.trim()).filter(Boolean); // remove empty strings
+    const abilityText = (leader.ability || '').split('.').map((s)=>s.trim()).filter(Boolean);
+    const civilizationBonusText = (leader.civilization?.civilization_bonus || '').split('.').map((s)=>s.trim()).filter(Boolean);
     const uniqueUnits = leader.civilization?.unique_units || [];
     const uniqueInfrastructure = leader.civilization?.unique_infrastructure || [];
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "LeaderCard.useEffect": ()=>{
+            const checkOverflow = {
+                "LeaderCard.useEffect.checkOverflow": ()=>{
+                    const COLLAPSED_MAX_PX = 144; // Tailwind max-h-36 = 9rem
+                    if (bonusContentRef.current) {
+                        const el = bonusContentRef.current;
+                        setIsBonusOverflowing(el.scrollHeight > COLLAPSED_MAX_PX + 4);
+                    }
+                    if (abilityContentRef.current) {
+                        const el = abilityContentRef.current;
+                        setIsAbilityOverflowing(el.scrollHeight > COLLAPSED_MAX_PX + 4);
+                    }
+                }
+            }["LeaderCard.useEffect.checkOverflow"];
+            checkOverflow();
+            window.addEventListener('resize', checkOverflow);
+            return ({
+                "LeaderCard.useEffect": ()=>{
+                    window.removeEventListener('resize', checkOverflow);
+                }
+            })["LeaderCard.useEffect"];
+        }
+    }["LeaderCard.useEffect"], [
+        leader.id
+    ]);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: `
-        w-full h-[600px] sm:h-[700px] lg:h-[800px]    /* responsive height and width */
+        w-full
+        min-h-[600px] sm:min-h-[700px] lg:min-h-[800px] h-auto
         relative group transition-all duration-300
         transform hover:scale-105 hover:z-10
         ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
-        overflow-hidden
       `,
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
             className: `
@@ -2105,10 +2139,10 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
           ${disabled ? 'cursor-not-allowed opacity-50' : ''}
           ${leader.is_banned ? 'border-red-500 shadow-lg shadow-red-500/20' : 'border-gray-700 hover:border-yellow-500 hover:shadow-xl hover:shadow-yellow-500/20'}
         `,
-            onClick: handleClick,
             children: [
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "w-full flex justify-center items-center p-3 sm:p-4",
+                    onClick: handleClick,
                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 relative overflow-hidden rounded-full",
                         children: [
@@ -2123,7 +2157,7 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                                 onError: handleImageError(`/images/leaders/${leader.image_key}`, '/images/leaders/placeholder.png')
                             }, void 0, false, {
                                 fileName: "[project]/src/components/LeaderCard.tsx",
-                                lineNumber: 81,
+                                lineNumber: 114,
                                 columnNumber: 13
                             }, this),
                             leader.is_banned && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2135,7 +2169,7 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                                             className: "w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-red-100 mx-auto mb-1 drop-shadow-lg"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/LeaderCard.tsx",
-                                            lineNumber: 96,
+                                            lineNumber: 129,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2143,18 +2177,18 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                                             children: "BANNED"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/LeaderCard.tsx",
-                                            lineNumber: 97,
+                                            lineNumber: 130,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/LeaderCard.tsx",
-                                    lineNumber: 95,
+                                    lineNumber: 128,
                                     columnNumber: 17
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/LeaderCard.tsx",
-                                lineNumber: 94,
+                                lineNumber: 127,
                                 columnNumber: 15
                             }, this),
                             !disabled && !leader.is_banned && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2166,7 +2200,7 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                                             className: "w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-red-100 mx-auto mb-1 drop-shadow-lg"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/LeaderCard.tsx",
-                                            lineNumber: 108,
+                                            lineNumber: 141,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2174,18 +2208,18 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                                             children: "CLICK TO BAN"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/LeaderCard.tsx",
-                                            lineNumber: 109,
+                                            lineNumber: 142,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/LeaderCard.tsx",
-                                    lineNumber: 107,
+                                    lineNumber: 140,
                                     columnNumber: 17
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/LeaderCard.tsx",
-                                lineNumber: 106,
+                                lineNumber: 139,
                                 columnNumber: 15
                             }, this),
                             !disabled && leader.is_banned && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2197,7 +2231,7 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                                             className: "w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-green-100 mx-auto mb-1 drop-shadow-lg animate-pulse"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/LeaderCard.tsx",
-                                            lineNumber: 119,
+                                            lineNumber: 152,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2205,29 +2239,29 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                                             children: "CLICK TO UNBAN"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/LeaderCard.tsx",
-                                            lineNumber: 120,
+                                            lineNumber: 153,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/LeaderCard.tsx",
-                                    lineNumber: 118,
+                                    lineNumber: 151,
                                     columnNumber: 17
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/LeaderCard.tsx",
-                                lineNumber: 117,
+                                lineNumber: 150,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/LeaderCard.tsx",
-                        lineNumber: 80,
+                        lineNumber: 113,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/LeaderCard.tsx",
-                    lineNumber: 79,
+                    lineNumber: 109,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2246,12 +2280,12 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                                     children: leader.name.split('(')[0]
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/LeaderCard.tsx",
-                                    lineNumber: 142,
+                                    lineNumber: 175,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("br", {}, void 0, false, {
                                     fileName: "[project]/src/components/LeaderCard.tsx",
-                                    lineNumber: 143,
+                                    lineNumber: 176,
                                     columnNumber: 13
                                 }, this),
                                 leader.name.includes('(') && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2262,24 +2296,24 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/LeaderCard.tsx",
-                                    lineNumber: 145,
+                                    lineNumber: 178,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("br", {}, void 0, false, {
                                         fileName: "[project]/src/components/LeaderCard.tsx",
-                                        lineNumber: 147,
+                                        lineNumber: 180,
                                         columnNumber: 19
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/LeaderCard.tsx",
-                                    lineNumber: 147,
+                                    lineNumber: 180,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/LeaderCard.tsx",
-                            lineNumber: 136,
+                            lineNumber: 169,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2289,13 +2323,13 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                             children: leader.civilization?.name
                         }, void 0, false, {
                             fileName: "[project]/src/components/LeaderCard.tsx",
-                            lineNumber: 149,
+                            lineNumber: 182,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/LeaderCard.tsx",
-                    lineNumber: 130,
+                    lineNumber: 163,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2314,7 +2348,7 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                                             onError: handleImageError(`/images/units/${unit.image_key}`, '/images/units/placeholder.png')
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/LeaderCard.tsx",
-                                            lineNumber: 164,
+                                            lineNumber: 197,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2322,18 +2356,18 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                                             children: unit.name
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/LeaderCard.tsx",
-                                            lineNumber: 171,
+                                            lineNumber: 204,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, unit.id, true, {
                                     fileName: "[project]/src/components/LeaderCard.tsx",
-                                    lineNumber: 163,
+                                    lineNumber: 196,
                                     columnNumber: 17
                                 }, this))
                         }, void 0, false, {
                             fileName: "[project]/src/components/LeaderCard.tsx",
-                            lineNumber: 161,
+                            lineNumber: 194,
                             columnNumber: 13
                         }, this),
                         uniqueInfrastructure.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2349,7 +2383,7 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                                             onError: handleImageError(`/images/infrastructure/${infra.image_key}`, '/images/infrastructure/placeholder.png')
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/LeaderCard.tsx",
-                                            lineNumber: 180,
+                                            lineNumber: 213,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2357,44 +2391,68 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                                             children: infra.name
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/LeaderCard.tsx",
-                                            lineNumber: 187,
+                                            lineNumber: 220,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, infra.id, true, {
                                     fileName: "[project]/src/components/LeaderCard.tsx",
-                                    lineNumber: 179,
+                                    lineNumber: 212,
                                     columnNumber: 17
                                 }, this))
                         }, void 0, false, {
                             fileName: "[project]/src/components/LeaderCard.tsx",
-                            lineNumber: 177,
+                            lineNumber: 210,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/LeaderCard.tsx",
-                    lineNumber: 159,
+                    lineNumber: 192,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "flex-grow flex flex-col",
                     children: [
                         leader.civilization?.civilization_bonus && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "p-3 sm:p-4 text-sm sm:text-base text-gray-300 bg-gray-900/50 overflow-hidden text-left flex-grow",
+                            className: "p-3 sm:p-4 text-sm sm:text-base text-gray-300 bg-gray-900/50 text-left flex-grow",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "font-semibold text-yellow-400 mb-2",
-                                    children: "Civilization Bonus:"
-                                }, void 0, false, {
+                                    className: "flex items-center justify-between mb-2 gap-2",
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            className: "font-semibold text-yellow-400",
+                                            children: "Civilization Bonus:"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/LeaderCard.tsx",
+                                            lineNumber: 233,
+                                            columnNumber: 17
+                                        }, this),
+                                        isBonusOverflowing && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                            type: "button",
+                                            className: "text-xs text-yellow-400 hover:text-yellow-300 underline whitespace-nowrap",
+                                            onClick: (e)=>{
+                                                e.stopPropagation();
+                                                setIsBonusExpanded((prev)=>!prev);
+                                            },
+                                            children: isBonusExpanded ? 'Show less' : 'Show more'
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/LeaderCard.tsx",
+                                            lineNumber: 235,
+                                            columnNumber: 19
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
                                     fileName: "[project]/src/components/LeaderCard.tsx",
-                                    lineNumber: 199,
+                                    lineNumber: 232,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "relative h-full overflow-hidden",
-                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "group-hover:animate-scroll-text absolute w-full pb-4",
+                                    ref: bonusClampRef,
+                                    className: `relative transition-all ${isBonusOverflowing && !isBonusExpanded ? 'max-h-36 overflow-hidden' : 'max-h-none overflow-visible'}`,
+                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
+                                        ref: bonusContentRef,
+                                        className: "pb-1 h-full",
                                         children: civilizationBonusText.map((sentence, i)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                                 className: "list-none mb-1",
                                                 children: [
@@ -2403,40 +2461,64 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                                                 ]
                                             }, i, true, {
                                                 fileName: "[project]/src/components/LeaderCard.tsx",
-                                                lineNumber: 203,
+                                                lineNumber: 257,
                                                 columnNumber: 21
                                             }, this))
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/LeaderCard.tsx",
-                                        lineNumber: 201,
+                                        lineNumber: 255,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/LeaderCard.tsx",
-                                    lineNumber: 200,
+                                    lineNumber: 247,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/LeaderCard.tsx",
-                            lineNumber: 198,
+                            lineNumber: 231,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "p-3 sm:p-4 flex-grow text-xs sm:text-sm text-gray-300 bg-gray-900/50 text-left overflow-hidden",
+                            className: "p-3 sm:p-4 flex-grow text-xs sm:text-sm text-gray-300 bg-gray-900/50 text-left",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "font-semibold text-yellow-400 mb-2",
-                                    children: "Leader Ability:"
-                                }, void 0, false, {
+                                    className: "flex items-center justify-between mb-2 gap-2",
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            className: "font-semibold text-yellow-400",
+                                            children: "Leader Ability:"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/LeaderCard.tsx",
+                                            lineNumber: 269,
+                                            columnNumber: 15
+                                        }, this),
+                                        isAbilityOverflowing && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                            type: "button",
+                                            className: "text-xs text-yellow-400 hover:text-yellow-300 underline whitespace-nowrap",
+                                            onClick: (e)=>{
+                                                e.stopPropagation();
+                                                setIsAbilityExpanded((prev)=>!prev);
+                                            },
+                                            children: isAbilityExpanded ? 'Show less' : 'Show more'
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/LeaderCard.tsx",
+                                            lineNumber: 271,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
                                     fileName: "[project]/src/components/LeaderCard.tsx",
-                                    lineNumber: 212,
+                                    lineNumber: 268,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "relative h-full overflow-hidden",
-                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "group-hover:animate-scroll-text absolute w-full pb-4",
+                                    ref: abilityClampRef,
+                                    className: `relative transition-all ${isAbilityOverflowing && !isAbilityExpanded ? 'max-h-36 overflow-hidden' : 'max-h-none overflow-visible'}`,
+                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
+                                        ref: abilityContentRef,
+                                        className: "pb-1 h-full",
                                         children: abilityText.map((sentence, i)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                                 className: "list-none mb-1",
                                                 children: [
@@ -2445,29 +2527,29 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                                                 ]
                                             }, i, true, {
                                                 fileName: "[project]/src/components/LeaderCard.tsx",
-                                                lineNumber: 216,
+                                                lineNumber: 293,
                                                 columnNumber: 19
                                             }, this))
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/LeaderCard.tsx",
-                                        lineNumber: 214,
+                                        lineNumber: 291,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/LeaderCard.tsx",
-                                    lineNumber: 213,
+                                    lineNumber: 283,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/LeaderCard.tsx",
-                            lineNumber: 211,
+                            lineNumber: 267,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/LeaderCard.tsx",
-                    lineNumber: 195,
+                    lineNumber: 228,
                     columnNumber: 9
                 }, this),
                 leader.is_banned && leader.banned_by && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2477,7 +2559,7 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                             className: "w-3 h-3"
                         }, void 0, false, {
                             fileName: "[project]/src/components/LeaderCard.tsx",
-                            lineNumber: 226,
+                            lineNumber: 305,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2488,28 +2570,28 @@ function LeaderCard({ leader, onToggleBan, disabled }) {
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/LeaderCard.tsx",
-                            lineNumber: 227,
+                            lineNumber: 306,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/LeaderCard.tsx",
-                    lineNumber: 225,
+                    lineNumber: 304,
                     columnNumber: 11
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/LeaderCard.tsx",
-            lineNumber: 64,
+            lineNumber: 95,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/LeaderCard.tsx",
-        lineNumber: 55,
+        lineNumber: 86,
         columnNumber: 5
     }, this);
 }
-_s(LeaderCard, "goSvWlVJ2utXSdW9TXN3Tt3ShNk=");
+_s(LeaderCard, "TMJ/tDAHARpd4ROKZW/p6QT+jFs=");
 _c = LeaderCard;
 var _c;
 __turbopack_context__.k.register(_c, "LeaderCard");

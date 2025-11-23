@@ -1,22 +1,28 @@
-[00:00:00.467] Server  LOG      ✓ Ready in 302ms
-[00:00:01.525] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:15.277] Browser WARN    Realtime send() is automatically falling back to REST API. This behavior will be deprecated in the future. Please use httpSend() explicitly for REST delivery.
-[00:00:20.960] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:23.697] Browser WARN    Realtime send() is automatically falling back to REST API. This behavior will be deprecated in the future. Please use httpSend() explicitly for REST delivery.
-[00:00:27.470] Browser LOG     BanStage handleToggleBan called for: leader-abraham-lincoln-3 by: asdffff
-[00:01:18.583] Browser WARN    Realtime send() is automatically falling back to REST API. This behavior will be deprecated in the future. Please use httpSend() explicitly for REST delivery.
-[00:01:18.931] Browser WARN    Realtime send() is automatically falling back to REST API. This behavior will be deprecated in the future. Please use httpSend() explicitly for REST delivery.
-[00:01:28.546] Browser LOG     Reconnecting leader socket (attempt 1/12) in 1660ms
-[00:01:28.547] Browser LOG     Reconnecting to presence socket (attempt 1/15) in 1113ms
-[00:01:57.210] Browser WARN    Realtime send() is automatically falling back to REST API. This behavior will be deprecated in the future. Please use httpSend() explicitly for REST delivery.
-[00:03:23.043] Server  LOG      ✓ Compiled in 44ms
-[00:03:30.332] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:03:36.346] Browser LOG     BanStage handleToggleBan called for: leader-alexander-50 by: asdffff
-[00:03:44.869] Browser LOG     BanStage handleToggleBan called for: leader-abraham-lincoln-3 by: asdffff
-[00:03:46.346] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:03:46.875] Browser ERROR   Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. asdffff
-[00:03:48.399] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:03:48.923] Browser ERROR   Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. asdffff
-[00:03:49.400] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:03:51.573] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:04:11.710] Browser LOG     BanStage handleToggleBan called for: leader-cleopatra-ptolemaic-21 by: beeep
+[00:00:00.492] Server  LOG      ✓ Ready in 321ms
+[00:01:27.017] Browser LOG     BanStage handleToggleBan called for: leader-basil-ii-11 by: asdf
+[00:01:27.632] Browser LOG     BanStage handleToggleBan called for: leader-basil-ii-11 by: asdf
+[00:01:28.892] Browser LOG     BanStage handleToggleBan called for: leader-catherine-de-medici-black-queen-28 by: asdf
+[00:01:29.245] Browser LOG     BanStage handleToggleBan called for: leader-catherine-de-medici-black-queen-28 by: asdf
+[00:01:30.627] Browser LOG     BanStage handleToggleBan called for: leader-cleopatra-ptolemaic-21 by: asdf
+[00:01:30.973] Browser LOG     BanStage handleToggleBan called for: leader-cleopatra-ptolemaic-21 by: asdf
+[00:01:31.624] Browser LOG     BanStage handleToggleBan called for: leader-cleopatra-ptolemaic-21 by: asdf
+[00:01:35.077] Browser LOG     BanStage handleToggleBan called for: leader-cleopatra-ptolemaic-21 by: asdf
+[00:01:42.877] Browser LOG     BanStage handleToggleBan called for: leader-alexander-50 by: asdf
+[00:01:49.718] Server  LOG      ✓ Compiled in 53ms
+[00:02:06.786] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:02:59.827] Server  LOG      ✓ Compiled in 41ms
+[00:04:35.453] Server  LOG      ✓ Compiled in 48ms
+[00:04:50.866] Browser ERROR   Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. asdf
+[00:06:06.077] Server  LOG      ✓ Compiled in 39ms
+[00:06:11.796] Browser ERROR   Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. asdf
+[00:07:27.197] Server  LOG      ✓ Compiled in 44ms
+[00:07:27.284] Browser ERROR   uncaughtError: ReferenceError: bonusRef is not defined
+[00:07:27.285] Browser ERROR   uncaughtError: ReferenceError: bonusRef is not defined
+[00:07:36.454] Server  WARN     ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:07:36.460] Server  WARN     ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:07:36.531] Server  LOG      ✓ Compiled in 55ms
+[00:07:36.672] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:07:51.584] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:09:40.213] Server  LOG      ✓ Compiled in 35ms
+[00:09:42.080] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:10:49.337] Server  LOG      ✓ Compiled in 38ms

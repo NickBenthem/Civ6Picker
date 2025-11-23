@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Ban, User, RotateCcw } from 'lucide-react';
 import { Leader } from '../lib/supabase';
 
@@ -10,6 +10,15 @@ interface LeaderCardProps {
 
 export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  const [isBonusExpanded, setIsBonusExpanded] = useState(false);
+  const [isAbilityExpanded, setIsAbilityExpanded] = useState(false);
+  const [isBonusOverflowing, setIsBonusOverflowing] = useState(false);
+  const [isAbilityOverflowing, setIsAbilityOverflowing] = useState(false);
+
+  const bonusClampRef = useRef<HTMLDivElement | null>(null);
+  const abilityClampRef = useRef<HTMLDivElement | null>(null);
+  const bonusContentRef = useRef<HTMLUListElement | null>(null);
+  const abilityContentRef = useRef<HTMLUListElement | null>(null);
 
   const handleImageError = (imagePath: string, fallbackPath: string) => (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const img = e.currentTarget;
@@ -37,28 +46,50 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
     }
   };
   const abilityText =
-  (leader.ability || '')
-  .split('.')
-  .map((s) => s.trim())
-  .filter(Boolean);          // remove empty strings
+    (leader.ability || '')
+      .split('.')
+      .map((s) => s.trim())
+      .filter(Boolean);
 
   const civilizationBonusText =
-  (leader.civilization?.civilization_bonus || '')
-  .split('.')
-  .map((s) => s.trim())
-  .filter(Boolean);          // remove empty strings
+    (leader.civilization?.civilization_bonus || '')
+      .split('.')
+      .map((s) => s.trim())
+      .filter(Boolean);
 
   const uniqueUnits = leader.civilization?.unique_units || [];
   const uniqueInfrastructure = leader.civilization?.unique_infrastructure || [];
 
+  useEffect(() => {
+    const checkOverflow = () => {
+      const COLLAPSED_MAX_PX = 144; // Tailwind max-h-36 = 9rem
+
+      if (bonusContentRef.current) {
+        const el = bonusContentRef.current;
+        setIsBonusOverflowing(el.scrollHeight > COLLAPSED_MAX_PX + 4);
+      }
+      if (abilityContentRef.current) {
+        const el = abilityContentRef.current;
+        setIsAbilityOverflowing(el.scrollHeight > COLLAPSED_MAX_PX + 4);
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+
+    return () => {
+      window.removeEventListener('resize', checkOverflow);
+    };
+  }, [leader.id]);
+
   return (
     <div
       className={`
-        w-full h-[600px] sm:h-[700px] lg:h-[800px]    /* responsive height and width */
+        w-full
+        min-h-[600px] sm:min-h-[700px] lg:min-h-[800px] h-auto
         relative group transition-all duration-300
         transform hover:scale-105 hover:z-10
         ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
-        overflow-hidden
       `}
     >
       <div
@@ -73,10 +104,12 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
               : 'border-gray-700 hover:border-yellow-500 hover:shadow-xl hover:shadow-yellow-500/20'
           }
         `}
-        onClick={handleClick}
       >
         {/* 1. Leader portrait */}
-        <div className="w-full flex justify-center items-center p-3 sm:p-4">
+        <div
+          className="w-full flex justify-center items-center p-3 sm:p-4"
+          onClick={handleClick}
+        >
           <div className="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 relative overflow-hidden rounded-full">
             <img
               src={`/images/leaders/${leader.image_key}`}
@@ -193,29 +226,75 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
 
         {/* 4. Civilization Bonus and 5. Ability description combined container */}
         <div className="flex-grow flex flex-col">
-          {/* 4. Civilization Bonus */}
+        {/* 4. Civilization Bonus */}
           {leader.civilization?.civilization_bonus && (
-            <div className="p-3 sm:p-4 text-sm sm:text-base text-gray-300 bg-gray-900/50 overflow-hidden text-left flex-grow">
-              <div className="font-semibold text-yellow-400 mb-2">Civilization Bonus:</div>
-              <div className="relative h-full overflow-hidden">
-                <div className="group-hover:animate-scroll-text absolute w-full pb-4">
+            <div className="p-3 sm:p-4 text-sm sm:text-base text-gray-300 bg-gray-900/50 text-left flex-grow">
+              <div className="flex items-center justify-between mb-2 gap-2">
+                <div className="font-semibold text-yellow-400">Civilization Bonus:</div>
+                {isBonusOverflowing && (
+                  <button
+                    type="button"
+                    className="text-xs text-yellow-400 hover:text-yellow-300 underline whitespace-nowrap"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsBonusExpanded((prev) => !prev);
+                    }}
+                  >
+                    {isBonusExpanded ? 'Show less' : 'Show more'}
+                  </button>
+                )}
+              </div>
+              <div
+                ref={bonusClampRef}
+                className={`relative transition-all ${
+                  isBonusOverflowing && !isBonusExpanded
+                    ? 'max-h-36 overflow-hidden'
+                    : 'max-h-none overflow-visible'
+                }`}
+              >
+                <ul ref={bonusContentRef} className="pb-1 h-full">
                   {civilizationBonusText.map((sentence, i) => (
-                    <li key={i} className="list-none mb-1">{sentence}.</li>
+                    <li key={i} className="list-none mb-1">
+                      {sentence}.
+                    </li>
                   ))}
-                </div>
+                </ul>
               </div>
             </div>
           )}
 
           {/* 5. Ability description */}
-          <div className="p-3 sm:p-4 flex-grow text-xs sm:text-sm text-gray-300 bg-gray-900/50 text-left overflow-hidden">
-            <div className="font-semibold text-yellow-400 mb-2">Leader Ability:</div>
-            <div className="relative h-full overflow-hidden">
-              <div className="group-hover:animate-scroll-text absolute w-full pb-4">
+          <div className="p-3 sm:p-4 flex-grow text-xs sm:text-sm text-gray-300 bg-gray-900/50 text-left">
+            <div className="flex items-center justify-between mb-2 gap-2">
+              <div className="font-semibold text-yellow-400">Leader Ability:</div>
+              {isAbilityOverflowing && (
+                <button
+                  type="button"
+                  className="text-xs text-yellow-400 hover:text-yellow-300 underline whitespace-nowrap"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsAbilityExpanded((prev) => !prev);
+                  }}
+                >
+                  {isAbilityExpanded ? 'Show less' : 'Show more'}
+                </button>
+              )}
+            </div>
+            <div
+              ref={abilityClampRef}
+              className={`relative transition-all ${
+                isAbilityOverflowing && !isAbilityExpanded
+                  ? 'max-h-36 overflow-hidden'
+                  : 'max-h-none overflow-visible'
+              }`}
+            >
+              <ul ref={abilityContentRef} className="pb-1 h-full">
                 {abilityText.map((sentence, i) => (
-                  <li key={i} className="list-none mb-1">{sentence}.</li>   
+                  <li key={i} className="list-none mb-1">
+                    {sentence}.
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           </div>
         </div>

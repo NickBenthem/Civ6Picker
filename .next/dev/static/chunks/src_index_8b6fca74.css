@@ -464,12 +464,28 @@ img, video {
   height: 100%;
 }
 
+.h-auto {
+  height: auto;
+}
+
 .max-h-12 {
   max-height: 3rem;
 }
 
+.max-h-24 {
+  max-height: 6rem;
+}
+
 .max-h-60 {
   max-height: 15rem;
+}
+
+.max-h-none {
+  max-height: none;
+}
+
+.max-h-36 {
+  max-height: 9rem;
 }
 
 .min-h-\[48px\] {
@@ -478,6 +494,10 @@ img, video {
 
 .min-h-screen {
   min-height: 100vh;
+}
+
+.min-h-\[600px\] {
+  min-height: 600px;
 }
 
 .w-12 {
@@ -709,6 +729,10 @@ img, video {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+}
+
+.whitespace-nowrap {
+  white-space: nowrap;
 }
 
 .rounded {
@@ -1062,12 +1086,12 @@ img, video {
   padding-bottom: .75rem;
 }
 
-.pb-10 {
-  padding-bottom: 2.5rem;
+.pb-1 {
+  padding-bottom: .25rem;
 }
 
-.pb-4 {
-  padding-bottom: 1rem;
+.pb-10 {
+  padding-bottom: 2.5rem;
 }
 
 .pt-16 {
@@ -1230,6 +1254,10 @@ img, video {
 .text-yellow-500 {
   --tw-text-opacity: 1;
   color: rgb(234 179 8 / var(--tw-text-opacity, 1));
+}
+
+.underline {
+  text-decoration-line: underline;
 }
 
 .placeholder-gray-400::placeholder {
@@ -1594,6 +1622,11 @@ input:focus, select:focus, textarea:focus {
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
 }
 
+.hover\:text-yellow-300:hover {
+  --tw-text-opacity: 1;
+  color: rgb(253 224 71 / var(--tw-text-opacity, 1));
+}
+
 .hover\:text-yellow-400:hover {
   --tw-text-opacity: 1;
   color: rgb(250 204 21 / var(--tw-text-opacity, 1));
@@ -1651,20 +1684,6 @@ input:focus, select:focus, textarea:focus {
   --tw-scale-x: 1.1;
   --tw-scale-y: 1.1;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-@keyframes scroll-text {
-  0% {
-    transform: translateY(0);
-  }
-
-  100% {
-    transform: translateY(calc(100px - 100%));
-  }
-}
-
-.group:hover .group-hover\:animate-scroll-text {
-  animation: 5s ease-in-out forwards scroll-text;
 }
 
 .group:hover .group-hover\:from-green-500\/40 {
@@ -1755,6 +1774,10 @@ input:focus, select:focus, textarea:focus {
 
   .sm\:max-h-16 {
     max-height: 4rem;
+  }
+
+  .sm\:min-h-\[700px\] {
+    min-height: 700px;
   }
 
   .sm\:w-28 {
@@ -1919,6 +1942,10 @@ input:focus, select:focus, textarea:focus {
 
   .lg\:h-\[800px\] {
     height: 800px;
+  }
+
+  .lg\:min-h-\[800px\] {
+    min-height: 800px;
   }
 
   .lg\:w-10 {
