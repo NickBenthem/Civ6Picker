@@ -1,10 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  createClient,
-  REALTIME_SUBSCRIBE_STATES,
-  RealtimePresenceState,
-  SupabaseClient,
-} from '@supabase/supabase-js';
+import { useEffect, useRef, useState } from 'react';
 import { createReconnectionManager } from '../utils/reconnectionManager';
 
 /* ------------------------------------------------------------------ */
@@ -12,186 +6,231 @@ import { createReconnectionManager } from '../utils/reconnectionManager';
 /* ------------------------------------------------------------------ */
 export interface ConnectedUser {
   id: string;
-  name: string | null;         // name may be null if a client tracked no name
+  name: string | null;
   online_at: string;
 }
 
-/* Supabase also adds presence_ref – describe it so TS is satisfied */
-type PresencePayload = ConnectedUser & { presence_ref: string };
-
-/* ------------------------------------------------------------------ */
-/* Supabase client (singleton)                                         */
-/* ------------------------------------------------------------------ */
-const supabaseUrl  = import.meta.env.NEXT_PUBLIC_SUPABASE_URL  as string;
-const supabaseKey  = import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
-const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey, {
-  realtime: {
-    params: {
-      eventsPerSecond: 10
+type PresenceEvent =
+  | {
+      type: 'presence_join';
+      lobbyCode: string;
+      userId: string;
+      name: string;
+      online_at: string;
     }
-  }
-});
+  | {
+      type: 'presence_leave';
+      lobbyCode: string;
+      userId: string;
+    };
 
 /* ------------------------------------------------------------------ */
 /* Presence hook                                                       */
 /* ------------------------------------------------------------------ */
-export function useUserPresence(userId: string, name: string, lobbyCode: string) {
+export function useUserPresence(
+  userId: string,
+  name: string,
+  lobbyCode: string
+) {
   const [connectedUsers, setConnectedUsers] = useState<ConnectedUser[]>([]);
-  const [isConnected,   setIsConnected]   = useState(false);
-  const [error,         setError]         = useState<Error | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   const [isReconnecting, setIsReconnecting] = useState(false);
 
-  /* One channel per tab — keep in a ref so it survives re-renders */
-  const channelRef     = useRef<ReturnType<typeof supabase.channel> | null>(null);
-  const subscribedRef  = useRef(false); // guard against double subscribe
-  const reconnectionManagerRef = useRef(createReconnectionManager({
-    maxRetries: 15,
-    baseDelay: 1000,
-    maxDelay: 30000,
-    jitterFactor: 0.15,
-    onRetry: (attempt, delay) => {
-      console.log(`Reconnecting to presence channel (attempt ${attempt}/${15}) in ${delay}ms`);
-      setIsReconnecting(true);
-      setError(new Error(`Connection lost. Reconnecting... (attempt ${attempt})`));
-    },
-    onMaxRetriesReached: () => {
-      console.error('Max reconnection attempts reached for presence channel');
-      setIsReconnecting(false);
-      setError(new Error('Failed to reconnect after multiple attempts. Please refresh the page.'));
-    }
-  }));
+  const socketRef = useRef<WebSocket | null>(null);
 
-  /* Key must be unique per tab (Supabase Presence requirement) */
-  const presenceKey = useMemo(
-    () => `${userId}_${crypto.randomUUID()}`,
-    [userId],
+  const reconnectionManagerRef = useRef(
+    createReconnectionManager({
+      maxRetries: 15,
+      baseDelay: 1000,
+      maxDelay: 30000,
+      jitterFactor: 0.15,
+      onRetry: (attempt, delay) => {
+        console.log(
+          `Reconnecting to presence socket (attempt ${attempt}/${15}) in ${delay}ms`
+        );
+        setIsReconnecting(true);
+        setError(
+          new Error(
+            `Connection lost. Reconnecting... (attempt ${attempt})`
+          )
+        );
+      },
+      onMaxRetriesReached: () => {
+        console.error('Max reconnection attempts reached for presence socket');
+        setIsReconnecting(false);
+        setError(
+          new Error(
+            'Failed to reconnect after multiple attempts. Please refresh the page.'
+          )
+        );
+      },
+    })
   );
 
-  const setupChannel = () => {
-    /* Lazily create the channel only once */
-    if (!channelRef.current) {
-      channelRef.current = supabase.channel(`user-presence-${lobbyCode}`, {
-        config: { presence: { key: presenceKey } },
-      // @ts-expect-error: `timeout` not yet in the public typings
-      timeout: 6000,          // ms
-      });
+  const sendPresenceEvent = (event: PresenceEvent) => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return;
+    try {
+      socket.send(JSON.stringify(event));
+    } catch (e) {
+      console.error('Failed to send presence event:', e);
     }
-    return channelRef.current;
   };
 
-  const subscribeToChannel = (channel: ReturnType<typeof supabase.channel>) => {
-    /* Handler for full state syncs */
-    const refreshFromState = () => {
-        const state: RealtimePresenceState<PresencePayload> =
-          channel.presenceState<PresencePayload>();
-    
-        setConnectedUsers(
-          Object.values(state)
-            .flat()
-            .map(({ presence_ref, ...rest }) => rest),
-        );
+  const setupSocket = () => {
+    if (!lobbyCode) return null;
+
+    if (socketRef.current) {
+      try {
+        socketRef.current.close();
+      } catch {
+        // ignore
+      }
+      socketRef.current = null;
+    }
+
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${protocol}://${window.location.host}/api/ws`);
+
+    ws.addEventListener('open', () => {
+      setIsConnected(true);
+      setIsReconnecting(false);
+      setError(null);
+      reconnectionManagerRef.current.reset();
+
+      // Identify the lobby
+      const initMessage = {
+        type: 'init',
+        lobbyCode,
       };
 
-    return channel
-        /* Full resync (first load or reconnect) */
-        .on('presence', { event: 'sync' }, refreshFromState)
-    
-        /* Diff events arrive instantly but we still mutate local state
-           so users show up in <1 s instead of waiting for the next sync. */
-        .on('presence', { event: 'join' }, ({ newPresences }) => {
-          setConnectedUsers((prev) => [
-            ...prev,
-            ...(newPresences as PresencePayload[]).map(({ presence_ref, ...rest }) => rest),
-          ]);
-        })
-        .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-          setConnectedUsers((prev) =>
-            prev.filter(
-              (u) => !leftPresences.some((l) => (l as PresencePayload).id === u.id),
-            ),
-          );
-        })
-      .subscribe(async (status, err) => {
-        if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
-          setIsConnected(true);
-          setIsReconnecting(false);
-          setError(null);
-          reconnectionManagerRef.current.reset(); // Reset retry counter on successful connection
-          
-          try {
-            // Track user presence with lobby information
-            await channel.track({
-              id: userId,
-              name,
-              online_at: new Date().toISOString(),
-            });
+      try {
+        ws.send(JSON.stringify(initMessage));
+      } catch (e) {
+        console.error('Failed to send presence init message:', e);
+      }
 
-            // Also store in connected_users table with lobby_code
-            await supabase
-              .from('connected_users')
-              .upsert({
-                user_name: name,
-                lobby_code: lobbyCode,
-                last_seen: new Date().toISOString()
-              }, {
-                onConflict: 'user_name'
-              });
+      // Announce our presence
+      const joinEvent: PresenceEvent = {
+        type: 'presence_join',
+        lobbyCode,
+        userId,
+        name,
+        online_at: new Date().toISOString(),
+      };
+      sendPresenceEvent(joinEvent);
+    });
 
-          } catch (trackErr) {
-            setError(trackErr as Error);
+    ws.addEventListener('message', (eventMessage) => {
+      let event: PresenceEvent;
+      try {
+        event = JSON.parse(String(eventMessage.data)) as PresenceEvent;
+      } catch {
+        return;
+      }
+
+      if (event.lobbyCode !== lobbyCode) {
+        return;
+      }
+
+      if (event.type === 'presence_join') {
+        setConnectedUsers((prev) => {
+          const existing = prev.find((u) => u.id === event.userId);
+          if (existing) {
+            return prev.map((u) =>
+              u.id === event.userId
+                ? {
+                    ...u,
+                    name: event.name,
+                    online_at: event.online_at,
+                  }
+                : u
+            );
           }
-        }
+          return [
+            ...prev,
+            {
+              id: event.userId,
+              name: event.name,
+              online_at: event.online_at,
+            },
+          ];
+        });
+      }
 
-        if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
-          console.error('Presence channel error:', err);
-          setIsConnected(false);
-          
-          // Schedule reconnection with backoff
-          reconnectionManagerRef.current.scheduleRetry(() => {
-            // Clean up old channel
-            if (channelRef.current) {
-              channelRef.current.unsubscribe();
-              channelRef.current = null;
-            }
-            subscribedRef.current = false;
-            
-            // Re-subscribe
-            const newChannel = setupChannel();
-            subscribeToChannel(newChannel);
-          });
-        }
+      if (event.type === 'presence_leave') {
+        setConnectedUsers((prev) =>
+          prev.filter((u) => u.id !== event.userId)
+        );
+      }
+    });
+
+    ws.addEventListener('error', (err) => {
+      console.error('Presence socket error:', err);
+      setIsConnected(false);
+      setIsReconnecting(true);
+      reconnectionManagerRef.current.scheduleRetry(() => {
+        setupSocket();
       });
+    });
+
+    ws.addEventListener('close', () => {
+      setIsConnected(false);
+      setIsReconnecting(true);
+      reconnectionManagerRef.current.scheduleRetry(() => {
+        setupSocket();
+      });
+    });
+
+    socketRef.current = ws;
+    return ws;
   };
 
   useEffect(() => {
     const handleUnload = () => {
-      if (!channelRef.current) return;
-      /* Tell the server we're gone NOW */
-      channelRef.current.untrack();        // sends Presence LEAVE
-      channelRef.current.unsubscribe();    // closes socket if idle
-      supabase.removeChannel(channelRef.current);
-    };
-    
-    window.addEventListener('pagehide', handleUnload); // pagehide works with bfcache
-    
-    const channel = setupChannel();
+      const leaveEvent: PresenceEvent = {
+        type: 'presence_leave',
+        lobbyCode,
+        userId,
+      };
+      sendPresenceEvent(leaveEvent);
 
-    /* Bail out if we already subscribed (Strict Mode double invoke) */
-    if (subscribedRef.current) return;
-    subscribedRef.current = true;
-
-    subscribeToChannel(channel);
-
-    /* Cleanup on unmount */
-    return () => {
-      reconnectionManagerRef.current.cancel();
-      if (channelRef.current) {
-        channelRef.current.unsubscribe();
-        channelRef.current = null;
+      if (socketRef.current) {
+        try {
+          socketRef.current.close();
+        } catch {
+          // ignore
+        }
+        socketRef.current = null;
       }
-      subscribedRef.current = false;
     };
-  }, [userId, name, presenceKey, lobbyCode]);
+
+    window.addEventListener('pagehide', handleUnload);
+
+    if (lobbyCode) {
+      setupSocket();
+    }
+
+    return () => {
+      window.removeEventListener('pagehide', handleUnload);
+      reconnectionManagerRef.current.cancel();
+      if (socketRef.current) {
+        try {
+          const leaveEvent: PresenceEvent = {
+            type: 'presence_leave',
+            lobbyCode,
+            userId,
+          };
+          sendPresenceEvent(leaveEvent);
+          socketRef.current.close();
+        } catch {
+          // ignore
+        }
+        socketRef.current = null;
+      }
+    };
+  }, [userId, name, lobbyCode]);
 
   return { connectedUsers, isConnected, error, isReconnecting };
 }

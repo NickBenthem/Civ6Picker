@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 16, "column": 0}, "map": {"version":3,"sources":["file:///Users/nickb/git/Civ6Picker/pages/_app.tsx"],"sourcesContent":["import type { AppProps } from 'next/app';\nimport { useEffect } from 'react';\nimport '../src/index.css';\n\nexport default function MyApp({ Component, pageProps }: AppProps) {\n  useEffect(() => {\n    // Run footer script only in the browser\n    import('../src/utils/footerManager.js').catch(() => {\n      // Ignore errors in non-DOM environments\n    });\n  }, []);\n\n  return <Component {...pageProps} />;\n}\n\n"],"names":[],"mappings":";;;;;AACA;;;;AAGe,SAAS,MAAM,EAAE,SAAS,EAAE,SAAS,EAAY;IAC9D,IAAA,gHAAS,EAAC;QACR,wCAAwC;QACxC,iGAAwC,KAAK,CAAC;QAC5C,wCAAwC;QAC1C;IACF,GAAG,EAAE;IAEL,qBAAO,qKAAC;QAAW,GAAG,SAAS;;;;;;AACjC"}}]
+}

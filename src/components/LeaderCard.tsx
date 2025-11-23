@@ -164,6 +164,7 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
                   <img
                     src={`/images/units/${unit.image_key}`}
                     alt={unit.name}
+                    loading="lazy"
                     className="w-5 h-5 sm:w-6 sm:h-6"
                     onError={handleImageError(`/images/units/${unit.image_key}`, '/images/units/placeholder.png')}
                   />
@@ -179,6 +180,7 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
                   <img
                     src={`/images/infrastructure/${infra.image_key}`}
                     alt={infra.name}
+                    loading="lazy"
                     className="w-5 h-5 sm:w-6 sm:h-6"
                     onError={handleImageError(`/images/infrastructure/${infra.image_key}`, '/images/infrastructure/placeholder.png')}
                   />
@@ -229,4 +231,3 @@ export function LeaderCard({ leader, onToggleBan, disabled }: LeaderCardProps) {
     </div>
   );
 }
-

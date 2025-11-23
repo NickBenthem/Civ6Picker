@@ -1,162 +1,328 @@
-import { useState, useEffect, useRef } from 'react';
-import { fetchLeaders, type Leader } from '../lib/supabase';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type BaseLeader,
+  type Leader,
+  type LeaderState,
+} from '../lib/supabase';
+import { baseLeaders } from '../data/leaders';
+import { loadLobbyState, saveLobbyState } from '../utils/lobbyStateStorage';
 import { createReconnectionManager } from '../utils/reconnectionManager';
 
-const supabaseUrl  = import.meta.env.NEXT_PUBLIC_SUPABASE_URL  as string;
+type LeaderBroadcastEvent =
+  | {
+      type: 'ban_toggled';
+      lobbyCode: string;
+      leaderId: string;
+      userName: string;
+      isBanned: boolean;
+      timestamp: string;
+    }
+  | {
+      type: 'state_request';
+      lobbyCode: string;
+      requestId: string;
+      requester: string;
+    }
+  | {
+      type: 'state_snapshot';
+      lobbyCode: string;
+      requestId: string;
+      leaders: LeaderState[];
+      sentBy: string;
+      timestamp: string;
+    };
 
-const API_URL = `${supabaseUrl}/functions/v1`;
+function mergeBaseWithState(
+  base: BaseLeader[],
+  stateMap: Map<string, LeaderState>
+): Leader[] {
+  return base.map((leader) => {
+    const state = stateMap.get(leader.id);
+    return {
+      ...leader,
+      is_banned: state?.is_banned ?? false,
+      banned_by: state?.banned_by ?? null,
+      banned_at: state?.banned_at ?? null,
+    };
+  });
+}
+
+function toLeaderStates(leaders: Leader[]): LeaderState[] {
+  return leaders.map((leader) => ({
+    id: leader.id,
+    is_banned: leader.is_banned,
+    banned_by: leader.banned_by,
+    banned_at: leader.banned_at,
+  }));
+}
 
 export function useLeaders(lobbyCode: string) {
-  const [leaders, setLeaders] = useState<Leader[]>([]);
+  const [leaders, setLeaders] = useState<Leader[]>(() =>
+    mergeBaseWithState(baseLeaders, new Map())
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [isReconnecting, setIsReconnecting] = useState(false);
 
-  const eventSourceRef = useRef<EventSource | null>(null);
-  const reconnectionManagerRef = useRef(createReconnectionManager({
-    maxRetries: 12,
-    baseDelay: 1500,
-    maxDelay: 45000,
-    jitterFactor: 0.2,
-    onRetry: (attempt, delay) => {
-      console.log(`Reconnecting EventSource (attempt ${attempt}/${12}) in ${delay}ms`);
-      setIsReconnecting(true);
-      setError(new Error(`Leader updates connection lost. Reconnecting... (attempt ${attempt})`));
-    },
-    onMaxRetriesReached: () => {
-      console.error('Max reconnection attempts reached for EventSource');
-      setIsReconnecting(false);
-      setError(new Error('Failed to reconnect to leader updates after multiple attempts. Please refresh the page.'));
-    }
-  }));
+  const leadersRef = useRef<Leader[]>(leaders);
+  const socketRef = useRef<WebSocket | null>(null);
+  const lastRequestIdRef = useRef<string | null>(null);
 
-  async function fetchLeadersData() {
-    try {
-      const data = await fetchLeaders(lobbyCode);
-      setLeaders(data);
-    } catch (e) {
-      setError(e instanceof Error ? e : new Error('Failed to fetch leaders'));
-    } finally {
-      setLoading(false);
+  const reconnectionManagerRef = useRef(
+    createReconnectionManager({
+      maxRetries: 12,
+      baseDelay: 1500,
+      maxDelay: 45000,
+      jitterFactor: 0.2,
+      onRetry: (attempt, delay) => {
+        console.log(
+          `Reconnecting leader socket (attempt ${attempt}/${12}) in ${delay}ms`
+        );
+        setIsReconnecting(true);
+        setError(
+          new Error(
+            `Leader updates connection lost. Reconnecting... (attempt ${attempt})`
+          )
+        );
+      },
+      onMaxRetriesReached: () => {
+        console.error('Max reconnection attempts reached for leader channel');
+        setIsReconnecting(false);
+        setError(
+          new Error(
+            'Failed to reconnect to leader updates after multiple attempts. Please refresh the page.'
+          )
+        );
+      },
+    })
+  );
+
+  useEffect(() => {
+    leadersRef.current = leaders;
+  }, [leaders]);
+
+  const initialLeaders = useMemo(() => {
+    const stored = lobbyCode ? loadLobbyState(lobbyCode) : null;
+    if (!stored || !stored.leaders.length) {
+      return mergeBaseWithState(baseLeaders, new Map());
     }
-  }
+
+    const stateMap = new Map<string, LeaderState>();
+    for (const state of stored.leaders) {
+      stateMap.set(state.id, state);
+    }
+    return mergeBaseWithState(baseLeaders, stateMap);
+  }, [lobbyCode]);
+
+  useEffect(() => {
+    setLeaders(initialLeaders);
+    setLoading(false);
+  }, [initialLeaders]);
 
   async function toggleBanLeader(leaderId: string, userName: string) {
-    const currentLeader = leaders.find(l => l.id === leaderId);
-    if (!currentLeader) throw new Error('Leader not found');
+    const currentLeader = leadersRef.current.find((l) => l.id === leaderId);
+    if (!currentLeader) {
+      throw new Error('Leader not found');
+    }
+
+    const nextIsBanned = !currentLeader.is_banned;
+    const timestamp = new Date().toISOString();
+
+    setLeaders((prevLeaders) => {
+      const updated = prevLeaders.map((leader) =>
+        leader.id === leaderId
+          ? {
+              ...leader,
+              is_banned: nextIsBanned,
+              banned_by: nextIsBanned ? userName : null,
+              banned_at: nextIsBanned ? timestamp : null,
+            }
+          : leader
+      );
+      saveLobbyState(lobbyCode, toLeaderStates(updated));
+      return updated;
+    });
+
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    const event: LeaderBroadcastEvent = {
+      type: 'ban_toggled',
+      lobbyCode,
+      leaderId,
+      userName,
+      isBanned: nextIsBanned,
+      timestamp,
+    };
 
     try {
-      // Update the local state immediately for better UX
-      setLeaders(prevLeaders => 
-        prevLeaders.map(leader => 
-          leader.id === leaderId 
-            ? {
-                ...leader,
-                is_banned: !leader.is_banned,
-                banned_by: !leader.is_banned ? userName : null,
-                banned_at: !leader.is_banned ? new Date().toISOString() : null
-              }
-            : leader
-        )
-      );
-
-      // Call the broadcast-leader-state endpoint
-      const response = await fetch(`${API_URL}/broadcast-leader-state`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          leaderId,
-          userName,
-          lobbyCode,
-          isBanned: !currentLeader.is_banned
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update ban status');
-      }
+      socket.send(JSON.stringify(event));
     } catch (e) {
-      setError(e instanceof Error ? e : new Error('Failed to toggle ban'));
-      // Revert the local state change on error
-      setLeaders(prevLeaders => 
-        prevLeaders.map(leader => 
-          leader.id === leaderId 
-            ? {
-                ...leader,
-                is_banned: currentLeader.is_banned,
-                banned_by: currentLeader.banned_by,
-                banned_at: currentLeader.banned_at
-              }
-            : leader
-        )
+      console.error('Failed to broadcast ban toggle:', e);
+      setError(
+        e instanceof Error ? e : new Error('Failed to broadcast ban toggle')
       );
     }
   }
 
-  const setupEventSource = () => {
-    // Close existing connection if any
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-      eventSourceRef.current = null;
+  const setupSocket = () => {
+    if (!lobbyCode) {
+      return null;
     }
 
-    // Create new EventSource connection with lobby code
-    eventSourceRef.current = new EventSource(`${API_URL}/broadcast-leader-state?lobbyCode=${encodeURIComponent(lobbyCode)}`);
+    if (socketRef.current) {
+      try {
+        socketRef.current.close();
+      } catch {
+        // ignore
+      }
+      socketRef.current = null;
+    }
 
-    eventSourceRef.current?.addEventListener('leader-updated', (event) => {
-      const updatedLeader = JSON.parse(event.data);
-      setLeaders(prevLeaders => 
-        prevLeaders.map(leader => 
-          leader.id === updatedLeader.id ? updatedLeader : leader
-        )
-      );
-    });
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${protocol}://${window.location.host}/api/ws`);
 
-    eventSourceRef.current?.addEventListener('open', () => {
-      console.log('EventSource connection opened');
+    ws.addEventListener('open', () => {
       setIsReconnecting(false);
       setError(null);
-      reconnectionManagerRef.current.reset(); // Reset retry counter on successful connection
+      reconnectionManagerRef.current.reset();
+
+      // Identify the lobby on the server
+      const initMessage = {
+        type: 'init',
+        lobbyCode,
+      };
+
+      try {
+        ws.send(JSON.stringify(initMessage));
+      } catch (e) {
+        console.error('Failed to send init message:', e);
+      }
+
+      // Ask existing clients for a snapshot if we do not have local state
+      const hasLocalState =
+        (loadLobbyState(lobbyCode)?.leaders.length ?? 0) > 0;
+      if (!hasLocalState) {
+        const requestId = crypto.randomUUID();
+        lastRequestIdRef.current = requestId;
+        const requestEvent: LeaderBroadcastEvent = {
+          type: 'state_request',
+          lobbyCode,
+          requestId,
+          requester: lobbyCode,
+        };
+        try {
+          ws.send(JSON.stringify(requestEvent));
+        } catch (e) {
+          console.error('Failed to send state request:', e);
+        }
+      }
     });
 
-    eventSourceRef.current?.addEventListener('error', (error) => {
-      console.error('EventSource failed:', error);
+    ws.addEventListener('message', (eventMessage) => {
+      let event: LeaderBroadcastEvent;
+      try {
+        event = JSON.parse(String(eventMessage.data)) as LeaderBroadcastEvent;
+      } catch {
+        return;
+      }
+
+      if (event.lobbyCode !== lobbyCode) {
+        return;
+      }
+
+        if (event.type === 'ban_toggled') {
+          setLeaders((prevLeaders) => {
+            const updated = prevLeaders.map((leader) =>
+              leader.id === event.leaderId
+                ? {
+                    ...leader,
+                    is_banned: event.isBanned,
+                    banned_by: event.isBanned ? event.userName : null,
+                    banned_at: event.isBanned ? event.timestamp : null,
+                  }
+                : leader
+            );
+            saveLobbyState(lobbyCode, toLeaderStates(updated));
+            return updated;
+          });
+        }
+
+      if (event.type === 'state_request') {
+        // Respond with our current snapshot
+        try {
+          const snapshot: LeaderBroadcastEvent = {
+            type: 'state_snapshot',
+            lobbyCode,
+            requestId: event.requestId,
+            leaders: toLeaderStates(leadersRef.current),
+            sentBy: event.requester,
+            timestamp: new Date().toISOString(),
+          };
+          ws.send(JSON.stringify(snapshot));
+        } catch (e) {
+          console.error('Failed to send state snapshot:', e);
+        }
+      }
+
+      if (event.type === 'state_snapshot') {
+        if (!lastRequestIdRef.current) {
+          return;
+        }
+        if (event.requestId !== lastRequestIdRef.current) {
+          return;
+        }
+
+        const stateMap = new Map<string, LeaderState>();
+        for (const state of event.leaders) {
+          stateMap.set(state.id, state);
+        }
+
+        setLeaders(() => {
+          const merged = mergeBaseWithState(baseLeaders, stateMap);
+          saveLobbyState(lobbyCode, toLeaderStates(merged));
+          return merged;
+        });
+
+        lastRequestIdRef.current = null;
+      }
+    });
+
+    ws.addEventListener('error', (err) => {
+      console.error('Leader socket error:', err);
       setIsReconnecting(true);
-      
-      // Schedule reconnection with backoff
       reconnectionManagerRef.current.scheduleRetry(() => {
-        setupEventSource();
+        setupSocket();
       });
     });
 
-    return eventSourceRef.current;
+    ws.addEventListener('close', () => {
+      setIsReconnecting(true);
+      reconnectionManagerRef.current.scheduleRetry(() => {
+        setupSocket();
+      });
+    });
+
+    socketRef.current = ws;
+    return ws;
   };
 
   useEffect(() => {
-    async function setupLeaders() {
-      try {
-        // Initial fetch
-        await fetchLeadersData();
-
-        // Setup Server-Sent Events connection
-        setupEventSource();
-
-      } catch (e) {
-        setError(e instanceof Error ? e : new Error('Failed to setup leaders'));
-      }
-    }
-
     if (lobbyCode) {
-      setupLeaders();
+      setupSocket();
     }
 
     return () => {
       reconnectionManagerRef.current.cancel();
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-        eventSourceRef.current = null;
+      if (socketRef.current) {
+        try {
+          socketRef.current.close();
+        } catch {
+          // ignore
+        }
+        socketRef.current = null;
       }
     };
   }, [lobbyCode]);
