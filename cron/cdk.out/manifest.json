@@ -1,0 +1,113 @@
+{
+  "version": "36.3.0",
+  "artifacts": {
+    "Civ6PickerCronStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "Civ6PickerCronStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "Civ6PickerCronStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://977640285970/us-east-1",
+      "properties": {
+        "templateFile": "Civ6PickerCronStack.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::977640285970:role/cdk-hnb659fds-deploy-role-977640285970-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::977640285970:role/cdk-hnb659fds-cfn-exec-role-977640285970-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-977640285970-us-east-1/f25680855a8e531d6f7307bd115cf0e4c351798765d5d3c05fb41efe67e386b2.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "Civ6PickerCronStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::977640285970:role/cdk-hnb659fds-lookup-role-977640285970-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "Civ6PickerCronStack.assets"
+      ],
+      "metadata": {
+        "/Civ6PickerCronStack/DailyVisitFunction/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DailyVisitFunctionServiceRole94D78CD3"
+          }
+        ],
+        "/Civ6PickerCronStack/DailyVisitFunction/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DailyVisitFunction2D4D6B75"
+          }
+        ],
+        "/Civ6PickerCronStack/DailyVisitFunction/LogRetention/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DailyVisitFunctionLogRetention3A4EF1E8"
+          }
+        ],
+        "/Civ6PickerCronStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+          }
+        ],
+        "/Civ6PickerCronStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB"
+          }
+        ],
+        "/Civ6PickerCronStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A"
+          }
+        ],
+        "/Civ6PickerCronStack/DailyVisitRule/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DailyVisitRule0CA9BE17"
+          }
+        ],
+        "/Civ6PickerCronStack/DailyVisitRule/AllowEventRuleCiv6PickerCronStackDailyVisitFunctionE84F4275": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DailyVisitRuleAllowEventRuleCiv6PickerCronStackDailyVisitFunctionE84F427593055DEF"
+          }
+        ],
+        "/Civ6PickerCronStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/Civ6PickerCronStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/Civ6PickerCronStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "Civ6PickerCronStack"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  }
+}
