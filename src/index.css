@@ -34,41 +34,13 @@ body {
   min-height: -webkit-fill-available;
 }
 
-/* Footer positioning with improved safe-area support */
+/* Footer with safe-area support */
 .footer {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 9999;
   background-color: #1f2937;
-  /* Safe-area inset for modern iOS - improved positioning */
+  /* Safe-area inset for modern iOS */
   padding-bottom: env(safe-area-inset-bottom, 0px);
   /* Fallback for iOS 11 */
   padding-bottom: constant(safe-area-inset-bottom, 0px);
-  /* Ensure proper width handling */
-  width: 100%;
-  max-width: 100vw;
-  /* Force hardware acceleration for smooth rendering */
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-  /* Ensure it stays above browser chrome */
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Ensure footer stays above browser chrome with better iPhone support */
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .footer {
-    bottom: 0;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-}
-
-@supports (padding-bottom: constant(safe-area-inset-bottom)) {
-  .footer {
-    bottom: 0;
-    padding-bottom: constant(safe-area-inset-bottom, 0px);
-  }
 }
 
 /* Main content container - 90% viewport width */
@@ -187,36 +159,9 @@ input:focus, select:focus, textarea:focus {
 
 /* iPhone/mobile specific fixes */
 @media screen and (max-width: 767px) {
-  /* Ensure footer is always visible on iPhone */
-  .footer {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    z-index: 9999 !important;
-    width: 100% !important;
-    max-width: 100vw !important;
-  }
-  
-  /* Prevent content from going behind footer */
-  body {
-    padding-bottom: calc(var(--footer-h, 0px) + env(safe-area-inset-bottom, 0px)) !important;
-  }
-  
   /* Ensure proper viewport height on iPhone */
   html, body {
     height: 100vh;
     height: -webkit-fill-available;
-  }
-  
-  /* Fix for iPhone Safari address bar */
-  @supports (-webkit-touch-callout: none) {
-    .footer {
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-    }
-    
-    body {
-      padding-bottom: calc(var(--footer-h, 0px) + env(safe-area-inset-bottom, 0px));
-    }
   }
 }
