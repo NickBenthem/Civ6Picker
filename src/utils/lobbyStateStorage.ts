@@ -1,10 +1,11 @@
 import type { LeaderState } from '../lib/supabase';
 
+// Bans used to live only in localStorage. They are now stored server-side;
+// this is read once per lobby to upload them, then cleared.
 const STORAGE_PREFIX = 'civ6picker:lobby:v1:';
 
 type StoredLobbyState = {
   leaders: LeaderState[];
-  lastUpdated: string;
 };
 
 function getStorageKey(lobbyCode: string): string {
@@ -37,26 +38,14 @@ export function loadLobbyState(
   }
 }
 
-export function saveLobbyState(
-  lobbyCode: string,
-  leaders: LeaderState[]
-): void {
+export function clearLobbyState(lobbyCode: string): void {
   if (typeof window === 'undefined' || !window.localStorage) {
     return;
   }
 
-  const payload: StoredLobbyState = {
-    leaders,
-    lastUpdated: new Date().toISOString(),
-  };
-
   try {
-    window.localStorage.setItem(
-      getStorageKey(lobbyCode),
-      JSON.stringify(payload)
-    );
+    window.localStorage.removeItem(getStorageKey(lobbyCode));
   } catch (error) {
-    console.error('Error saving lobby state to localStorage:', error);
+    console.error('Error clearing lobby state from localStorage:', error);
   }
 }
-

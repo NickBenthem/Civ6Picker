@@ -7,7 +7,7 @@ This document guides contributors and AI agents working on this project.
 - Reusable UI and logic are in `src/components/`, `src/hooks/`, `src/utils/`, and `src/lib/`.
 - Static leader and civilization data is built from `supabase/data/civ6leaderdata.json` into `src/data/leaders.ts` and sent to clients on initialization.
 - Static assets for builds are in `public/` and `dist/`.
-- Supabase config, SQL migrations, and legacy edge functions live under `supabase/`. Supabase is used only as a realtime event bus (no game state is stored in its database).
+- Supabase config, SQL migrations, and legacy edge functions live under `supabase/`. Supabase stores lobby bans in Postgres and relays live updates over Realtime.
 
 ## Build, Test, and Development Commands
 - `npm run dev` — Start the Vite dev server.
@@ -23,8 +23,9 @@ This document guides contributors and AI agents working on this project.
 
 ## State & Realtime Architecture
 - Leaders and civ metadata are static and come from `src/data/leaders.ts`; do not re-add database queries for this data.
-- Lobby and ban state are stored client-side per browser (see `src/hooks/useLeaders.ts` and `src/utils/lobbyStateStorage.ts`) and synced between clients via Supabase Realtime channels.
-- User presence uses Supabase Realtime Presence only; avoid writing to Supabase tables from the frontend.
+- Lobby bans are stored in Postgres (see `supabase/migrations/`) and pushed to other clients over Supabase Realtime broadcast (see `src/hooks/useLeaders.ts`).
+- Tables have row-level security with no policies; the frontend reaches them only through Postgres functions called with `supabase.rpc`. Add a function rather than granting direct table access.
+- User presence uses Supabase Realtime Presence only.
 
 ## Testing Guidelines
 - Co-locate tests with source files using `.test.ts` or `.test.tsx` (e.g., `src/utils/lobbyUtils.test.ts`).
